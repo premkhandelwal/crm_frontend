@@ -1,5 +1,5 @@
-import 'package:crm/add_complaint_screen.dart';
-import 'package:crm/home_screen.dart';
+import 'package:crm/ui/screens/add_screens/add_complaint_screen.dart';
+import 'package:crm/ui/screens/home_screen.dart';
 import 'package:flutter/widgets.dart';
 
 class NavRoutes {

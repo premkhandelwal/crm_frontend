@@ -1,7 +1,7 @@
 import 'package:crm/enums.dart';
+import 'package:crm/models/complaint_request.dart';
 import 'package:crm/providers/api_provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:crm/models/complaint_request.dart';
 import 'package:meta/meta.dart';
 
 part 'complaint_event.dart';
@@ -21,7 +21,7 @@ class ComplaintBloc extends Bloc<ComplaintEvent, ComplaintState> {
       void fetchComplaints() async {
         emit(
             ComplaintFetchState(submissionStatus: SubmissionStatus.inProgress));
-        List<Complaint> complaintList = await apiProvider.fetchComplaint();
+        List<Complaint> complaintList = await apiProvider.fetchComplaints();
         emit(ComplaintFetchState(
             submissionStatus: SubmissionStatus.success,
             complaintList: complaintList));

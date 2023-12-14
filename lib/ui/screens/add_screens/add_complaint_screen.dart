@@ -1,7 +1,6 @@
-import 'package:crm/blocs/complaint/complaint_bloc.dart';
+import 'package:crm/logic/blocs/complaint/complaint_bloc.dart';
 import 'package:crm/enums.dart';
 import 'package:crm/models/complaint_request.dart';
-import 'package:crm/navigation/route_registry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -102,8 +101,7 @@ class _AddComplaintScreenState extends State<AddComplaintScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                                 content: Text("Complaint added successfully")));
-                        Navigator.pushNamedAndRemoveUntil(
-                            context, NavRoutes.homeScreen, (route) => false);
+                        
                       } else if (state.submissionStatus ==
                           SubmissionStatus.failure) {
                         ScaffoldMessenger.of(context).showSnackBar(
