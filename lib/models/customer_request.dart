@@ -1,9 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:equatable/equatable.dart';
 
 part 'customer_request.g.dart';
 
 @JsonSerializable()
-class Customer {
+class Customer extends Equatable {
   String id;
   final String name;
 
@@ -18,4 +19,7 @@ class Customer {
   String toString() {
     return name;
   }
+  
+  @override
+  List<Object?> get props => [id, name];
 }

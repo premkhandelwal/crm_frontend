@@ -12,7 +12,15 @@ class ApiProvider {
 
   ApiProvider() : restApiClient = RestApiClient(DioBuilder.buildDioClient());
   Future addCustomer(Customer customerData) async {
-    await restApiClient.addCustomer(customerData);
+    return restApiClient.addCustomer(customerData);
+  }
+
+  Future editCustomer(Customer customerData) async {
+    return restApiClient.editCustomer(customerData);
+  }
+
+  Future deleteCustomer(Customer customerData) async {
+    return restApiClient.deleteCustomer(customerData);
   }
 
   Future<List<Customer>> fetchCustomers() async {
@@ -21,7 +29,15 @@ class ApiProvider {
   }
 
   Future addMake(Make makeData) async {
-    await restApiClient.addMake(makeData);
+    return restApiClient.addMake(makeData);
+  }
+
+  Future editMake(Make makeData) async {
+    return restApiClient.editMake(makeData);
+  }
+
+  Future deleteMake(Make makeData) async {
+    return restApiClient.deleteMake(makeData);
   }
 
   Future<List<Make>> fetchMake() async {
@@ -30,7 +46,15 @@ class ApiProvider {
   }
 
   Future addHarness(Harness harnessData) async {
-    await restApiClient.addHarness(harnessData);
+    return restApiClient.addHarness(harnessData);
+  }
+
+  Future editHarness(Harness harnessData) async {
+    return restApiClient.editHarness(harnessData);
+  }
+
+  Future deleteHarness(Harness harnessData) async {
+    return restApiClient.deleteHarness(harnessData);
   }
 
   Future<List<Harness>> fetchHarness() async {
@@ -39,7 +63,15 @@ class ApiProvider {
   }
 
   Future addBms(Bms bmsData) async {
-    await restApiClient.addBms(bmsData);
+    return restApiClient.addBms(bmsData);
+  }
+
+  Future editBms(Bms bmsData) async {
+    return restApiClient.editBms(bmsData);
+  }
+
+  Future deleteBms(Bms bmsData) async {
+    return restApiClient.deleteBms(bmsData);
   }
 
   Future<List<Bms>> fetchBms() async {
@@ -48,7 +80,15 @@ class ApiProvider {
   }
 
   Future addBatch(Batch batchData) async {
-    await restApiClient.addBatch(batchData);
+    return restApiClient.addBatch(batchData);
+  }
+
+  Future editBatch(Batch batchData) async {
+    return restApiClient.editBatch(batchData);
+  }
+
+  Future deleteBatch(Batch batchData) async {
+    return restApiClient.deleteBatch(batchData);
   }
 
   Future<List<Batch>> fetchBatch() async {
@@ -56,9 +96,8 @@ class ApiProvider {
     return batchList;
   }
 
-
   Future addComplaint(Complaint complaint) async {
-    await restApiClient.addComplaint(complaint);
+    return restApiClient.addComplaint(complaint);
   }
 
   Future<List<Complaint>> fetchComplaints() async {

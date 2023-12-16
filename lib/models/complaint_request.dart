@@ -1,9 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'complaint_request.g.dart';
 
 @JsonSerializable()
-class Complaint {
+class Complaint extends Equatable {
   String bmsClientName;
   String bmsName;
   DateTime returnDate;
@@ -28,4 +29,16 @@ class Complaint {
       _$ComplaintFromJson(json);
 
   Map<String, dynamic> toJson() => _$ComplaintToJson(this);
+
+  @override
+  List<Object?> get props => [
+        bmsClientName,
+        bmsName,
+        returnDate,
+        complaint,
+        batchNo,
+        harnessDetails,
+        make,
+        customerId
+      ];
 }

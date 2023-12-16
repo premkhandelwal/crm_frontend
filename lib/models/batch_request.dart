@@ -1,17 +1,17 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'batch_request.g.dart';
 
 @JsonSerializable()
-class Batch {
+class Batch extends Equatable {
   String id;
   final String batchName;
   final String bmsId;
   final List<String> harnessDetails;
   final String makeId;
   final String customerId;
-
 
   Batch({
     this.id = "",
@@ -30,4 +30,8 @@ class Batch {
   String toString() {
     return batchName;
   }
+
+  @override
+  List<Object?> get props =>
+      [id, batchName, bmsId, harnessDetails, makeId, customerId];
 }

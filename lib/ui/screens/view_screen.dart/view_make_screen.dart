@@ -1,10 +1,12 @@
 import 'package:crm/enums.dart';
 import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/make_request.dart';
+import 'package:crm/ui/screens/add_screens/add_make_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-List<Make> makes = [];
+List<Make> makeList = [];
 
 class ViewMakeScreen extends StatefulWidget {
   const ViewMakeScreen({super.key});
@@ -14,8 +16,10 @@ class ViewMakeScreen extends StatefulWidget {
 }
 
 class _ViewMakeScreenState extends State<ViewMakeScreen> {
+  late AppCubit appCubit;
   @override
   void initState() {
+    appCubit = context.read<AppCubit>();
     context.read<CustomerBloc>().add(FetchMakeEvent());
     super.initState();
   }
@@ -30,7 +34,12 @@ class _ViewMakeScreenState extends State<ViewMakeScreen> {
         listener: (context, makeState) {
           if (makeState is FetchMakeState &&
               makeState.submissionStatus == SubmissionStatus.success) {
-            makes = List.from(makeState.makeList);
+            makeList = List.from(makeState.makeList);
+          } else if (makeState is DeleteMakeState &&
+              makeState.submissionStatus == SubmissionStatus.success) {
+            makeList.remove(makeState.deletedMake);
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Deleted make successfully")));
           }
         },
         builder: (context, state) {
@@ -43,12 +52,27 @@ class _ViewMakeScreenState extends State<ViewMakeScreen> {
                     DataColumn(label: Text('Edit')),
                     DataColumn(label: Text('Delete')),
                   ],
-                  rows: makes.map((make) {
+                  rows: makeList.map((make) {
                     return DataRow(
                       cells: [
                         DataCell(Text(make.name)),
-                        const DataCell(Icon(Icons.edit)),
-                        const DataCell(Icon(Icons.delete)),
+                        DataCell(IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            appCubit.appPageChaged(AddMakeScreen(
+                              isEdit: true,
+                              editMakeData: make,
+                            ));
+                          },
+                        )),
+                        DataCell(IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            context
+                                .read<CustomerBloc>()
+                                .add(DeleteMakeEvent(makeData: make));
+                          },
+                        )),
                       ],
                     );
                   }).toList(),
@@ -57,6 +81,15 @@ class _ViewMakeScreenState extends State<ViewMakeScreen> {
             ],
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.read<AppCubit>().appPageChaged(const AddMakeScreen());
+        },
+        tooltip: "Add New Make",
+        child: const Icon(
+          Icons.add,
+        ),
       ),
     );
   }

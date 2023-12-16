@@ -1,11 +1,17 @@
 import 'package:crm/enums.dart';
 import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/customer_request.dart';
+import 'package:crm/ui/screens/view_screen.dart/view_customer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddCustomerScreen extends StatefulWidget {
-  const AddCustomerScreen({Key? key}) : super(key: key);
+  final bool isEdit;
+  final Customer? editCustomerData;
+  const AddCustomerScreen(
+      {Key? key, this.isEdit = false, this.editCustomerData})
+      : super(key: key);
 
   @override
   State<AddCustomerScreen> createState() => _AddCustomerScreenState();
@@ -20,6 +26,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 
   @override
   void initState() {
+    if (widget.isEdit) {
+      customerNameController.text = widget.editCustomerData!.name;
+    }
     customerBloc = BlocProvider.of<CustomerBloc>(context);
     super.initState();
   }
@@ -28,7 +37,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Customer"),
+        title: Text("${widget.isEdit ? 'Edit' : 'Add'} Customer"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -47,21 +56,26 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 const SizedBox(height: 20),
                 BlocConsumer<CustomerBloc, CustomerState>(
                   listener: (context, state) {
-                    if (state is AddCustomerState) {
+                    if (state is AddCustomerState ||
+                        state is EditCustomerState) {
                       if (state.submissionStatus == SubmissionStatus.success) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Customer added successfully")));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                "Customer ${widget.isEdit ? 'edited' : 'added'} successfully")));
+                        context
+                            .read<AppCubit>()
+                            .appPageChaged(const ViewCustomerScreen());
                       } else if (state.submissionStatus ==
                           SubmissionStatus.failure) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Failed to add customer")));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                "Failed to ${widget.isEdit ? 'edit' : 'add'} customer")));
                       }
                     }
                   },
                   builder: (context, state) {
-                    if (state is AddCustomerState &&
+                    if ((state is AddCustomerState ||
+                            state is EditCustomerState) &&
                         state.submissionStatus == SubmissionStatus.inProgress) {
                       return const Center(
                         child: CircularProgressIndicator(),
@@ -72,10 +86,18 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                         if (_formKey.currentState!.validate()) {
                           // Handle form submission
                           // Access the form field values using the controllers
-                          Customer customerData =
-                              Customer(name: customerNameController.text);
-                          customerBloc.add(
-                              AddCustomerEvent(customerData: customerData));
+                          Customer customerData = Customer(
+                            name: customerNameController.text,
+                          );
+                          if (widget.isEdit) {
+                            customerData.id = widget.editCustomerData!.id;
+                            customerBloc.add(EditCustomerEvent(
+                              customerData: customerData,
+                            ));
+                          } else {
+                            customerBloc.add(
+                                AddCustomerEvent(customerData: customerData));
+                          }
                         }
                       },
                       child: const Text('Submit'),

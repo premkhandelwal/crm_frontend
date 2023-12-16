@@ -1,10 +1,12 @@
 import 'package:crm/enums.dart';
 import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/customer_request.dart';
+import 'package:crm/ui/screens/add_screens/add_customer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-List<Customer> customers = [];
+List<Customer> customerList = [];
 
 class ViewCustomerScreen extends StatefulWidget {
   const ViewCustomerScreen({super.key});
@@ -14,9 +16,14 @@ class ViewCustomerScreen extends StatefulWidget {
 }
 
 class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
+  late CustomerBloc customerBloc;
+  late AppCubit appCubit;
+
   @override
   void initState() {
-    context.read<CustomerBloc>().add(FetchCustomerEvent());
+    customerBloc = BlocProvider.of<CustomerBloc>(context);
+    appCubit = BlocProvider.of<AppCubit>(context);
+    customerBloc.add(FetchCustomerEvent());
     super.initState();
   }
 
@@ -30,7 +37,12 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
         listener: (context, customerState) {
           if (customerState is FetchCustomerState &&
               customerState.submissionStatus == SubmissionStatus.success) {
-            customers = List.from(customerState.customerList);
+            customerList = List.from(customerState.customerList);
+          } else if (customerState is DeleteCustomerState &&
+              customerState.submissionStatus == SubmissionStatus.success) {
+            customerList.remove(customerState.deletedCustomer);
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Deleted customer successfully")));
           }
         },
         builder: (context, state) {
@@ -43,12 +55,25 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                     DataColumn(label: Text('Edit')),
                     DataColumn(label: Text('Delete')),
                   ],
-                  rows: customers.map((customer) {
+                  rows: customerList.map((customer) {
                     return DataRow(
                       cells: [
                         DataCell(Text(customer.name)),
-                        const DataCell(Icon(Icons.edit)),
-                        const DataCell(Icon(Icons.delete)),
+                        DataCell(IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () {
+                              appCubit.appPageChaged(AddCustomerScreen(
+                                isEdit: true,
+                                editCustomerData: customer,
+                              ));
+                            })),
+                        DataCell(IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            customerBloc.add(
+                                DeleteCustomerEvent(customerData: customer));
+                          },
+                        )),
                       ],
                     );
                   }).toList(),
@@ -57,6 +82,15 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
             ],
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          appCubit.appPageChaged(const AddCustomerScreen());
+        },
+        tooltip: "Add New Customer",
+        child: const Icon(
+          Icons.add,
+        ),
       ),
     );
   }

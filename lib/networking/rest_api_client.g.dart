@@ -49,6 +49,62 @@ class _RestApiClient implements RestApiClient {
   }
 
   @override
+  Future<Customer> editCustomer(Customer customerData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(customerData.toJson());
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Customer>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/editCustomer',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Customer.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<Customer> deleteCustomer(Customer customerId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(customerId.toJson());
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Customer>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/deleteCustomer',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Customer.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<List<Customer>> fetchCustomers() async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -93,6 +149,62 @@ class _RestApiClient implements RestApiClient {
             .compose(
               _dio.options,
               '/masters/addMake',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Make.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<Make> editMake(Make makeData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(makeData.toJson());
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Make>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/editMake',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Make.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<Make> deleteMake(Make makeData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(makeData.toJson());
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Make>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/deleteMake',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -163,6 +275,62 @@ class _RestApiClient implements RestApiClient {
   }
 
   @override
+  Future<Harness> editHarness(Harness harnessData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(harnessData.toJson());
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Harness>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/editHarness',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Harness.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<Harness> deleteHarness(Harness harnessData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(harnessData.toJson());
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Harness>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/deleteHarness',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Harness.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<List<Harness>> fetchHarness() async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -220,6 +388,62 @@ class _RestApiClient implements RestApiClient {
   }
 
   @override
+  Future<Bms> editBms(Bms bmsData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(bmsData.toJson());
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Bms>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/editBms',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Bms.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<Bms> deleteBms(Bms bmsData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(bmsData.toJson());
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Bms>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/deleteBms',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Bms.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<List<Bms>> fetchBms() async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -264,6 +488,62 @@ class _RestApiClient implements RestApiClient {
             .compose(
               _dio.options,
               '/masters/addBatch',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Batch.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<Batch> editBatch(Batch batchData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(batchData.toJson());
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Batch>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/editBatch',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Batch.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<Batch> deleteBatch(Batch batchData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(batchData.toJson());
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Batch>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/deleteBatch',
               queryParameters: queryParameters,
               data: _data,
             )

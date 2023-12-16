@@ -1,9 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'bms_request.g.dart';
 
 @JsonSerializable()
-class Bms {
+class Bms extends Equatable {
   String id;
   final String name;
   final String details;
@@ -18,4 +19,7 @@ class Bms {
   String toString() {
     return name;
   }
+
+  @override
+  List<Object?> get props => [id, name, details];
 }

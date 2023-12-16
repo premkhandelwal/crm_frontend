@@ -1,11 +1,16 @@
 import 'package:crm/enums.dart';
 import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/make_request.dart';
+import 'package:crm/ui/screens/view_screen.dart/view_make_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddMakeScreen extends StatefulWidget {
-  const AddMakeScreen({Key? key}) : super(key: key);
+  final bool isEdit;
+  final Make? editMakeData;
+  const AddMakeScreen({Key? key, this.isEdit = false, this.editMakeData})
+      : super(key: key);
 
   @override
   State<AddMakeScreen> createState() => _AddMakeScreenState();
@@ -20,6 +25,9 @@ class _AddMakeScreenState extends State<AddMakeScreen> {
 
   @override
   void initState() {
+    if (widget.isEdit) {
+      makeNameController.text = widget.editMakeData!.name;
+    }
     customerBloc = BlocProvider.of<CustomerBloc>(context);
     super.initState();
   }
@@ -28,7 +36,7 @@ class _AddMakeScreenState extends State<AddMakeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Make"),
+        title: Text("${widget.isEdit ? 'Edit' : 'Add'} Make"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -47,21 +55,24 @@ class _AddMakeScreenState extends State<AddMakeScreen> {
                 const SizedBox(height: 20),
                 BlocConsumer<CustomerBloc, CustomerState>(
                   listener: (context, state) {
-                    if (state is AddMakeState) {
+                    if (state is AddMakeState || state is EditMakeState) {
                       if (state.submissionStatus == SubmissionStatus.success) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Make added successfully")));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                "Make ${widget.isEdit ? 'edited' : 'added'} successfully")));
+                        context
+                            .read<AppCubit>()
+                            .appPageChaged(const ViewMakeScreen());
                       } else if (state.submissionStatus ==
                           SubmissionStatus.failure) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Failed to add make")));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                "Failed to ${widget.isEdit ? 'edit' : 'add'} make")));
                       }
                     }
                   },
                   builder: (context, state) {
-                    if (state is AddMakeState &&
+                    if ((state is AddMakeState || state is EditMakeState) &&
                         state.submissionStatus == SubmissionStatus.inProgress) {
                       return const Center(
                         child: CircularProgressIndicator(),
@@ -72,10 +83,15 @@ class _AddMakeScreenState extends State<AddMakeScreen> {
                         if (_formKey.currentState!.validate()) {
                           // Handle form submission
                           // Access the form field values using the controllers
-                          Make makeData =
-                              Make(name: makeNameController.text);
-                          customerBloc.add(
-                              AddMakeEvent(makeData: makeData));
+                          Make makeData = Make(name: makeNameController.text);
+                          if (widget.isEdit) {
+                            makeData.id = widget.editMakeData!.id;
+                            customerBloc.add(EditMakeEvent(
+                              makeData: makeData,
+                            ));
+                          } else {
+                            customerBloc.add(AddMakeEvent(makeData: makeData));
+                          }
                         }
                       },
                       child: const Text('Submit'),

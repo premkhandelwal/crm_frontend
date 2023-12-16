@@ -1,10 +1,13 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:crm/enums.dart';
 import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/batch_request.dart';
 import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/customer_request.dart';
 import 'package:crm/models/harness_request.dart';
 import 'package:crm/models/make_request.dart';
+import 'package:crm/ui/screens/view_screen.dart/view_batch_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,13 +16,13 @@ List<Bms> bmsList = [];
 List<Harness> harnessList = [];
 List<Make> makeList = [];
 
-Customer? selectedCustomer;
-Bms? selectedBms;
-List<Harness> selectedHarness = [];
-Make? selectedMake;
+
 
 class AddBatchScreen extends StatefulWidget {
-  const AddBatchScreen({Key? key}) : super(key: key);
+  final bool isEdit;
+  final Batch? editBatch;
+  const AddBatchScreen({Key? key, this.isEdit = false, this.editBatch})
+      : super(key: key);
 
   @override
   State<AddBatchScreen> createState() => _AddBatchScreenState();
@@ -33,8 +36,16 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
 
   late CustomerBloc customerBloc;
 
+  Customer? selectedCustomer;
+  Bms? selectedBms;
+  List<Harness> selectedHarness = [];
+  Make? selectedMake;
+
   @override
   void initState() {
+    if (widget.isEdit) {
+      batchNameController.text = widget.editBatch!.batchName;
+    }
     customerBloc = BlocProvider.of<CustomerBloc>(context);
     customerBloc.add(FetchBmsEvent());
     customerBloc.add(FetchCustomerEvent());
@@ -47,22 +58,41 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Batch"),
+        title: Text("${widget.isEdit ? 'Edit' : 'Add'} Batch"),
       ),
       body: BlocConsumer<CustomerBloc, CustomerState>(
         listener: (context, customerState) {
           if (customerState is FetchCustomerState &&
               customerState.submissionStatus == SubmissionStatus.success) {
             customerList = List.from(customerState.customerList);
+            if (widget.isEdit) {
+              selectedCustomer = customerList.firstWhere(
+                  (element) => element.id == widget.editBatch!.customerId);
+            }
           } else if (customerState is FetchBmsState &&
               customerState.submissionStatus == SubmissionStatus.success) {
             bmsList = List.from(customerState.bmsList);
+            if (widget.isEdit) {
+              selectedBms = bmsList.firstWhere(
+                  (element) => element.id == widget.editBatch!.bmsId);
+            }
           } else if (customerState is FetchHarnessState &&
               customerState.submissionStatus == SubmissionStatus.success) {
             harnessList = List.from(customerState.harnessList);
+            if (widget.isEdit) {
+              //selectedHarness
+              for (var harnessId in widget.editBatch!.harnessDetails) {
+                selectedHarness.add(harnessList
+                    .firstWhere((element) => element.id == harnessId));
+              }
+            }
           } else if (customerState is FetchMakeState &&
               customerState.submissionStatus == SubmissionStatus.success) {
             makeList = List.from(customerState.makeList);
+            if (widget.isEdit) {
+              selectedMake = makeList.firstWhere(
+                  (element) => element.id == widget.editBatch!.makeId);
+            }
           }
         },
         builder: (context, state) {
@@ -148,22 +178,26 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
                     const SizedBox(height: 20),
                     BlocConsumer<CustomerBloc, CustomerState>(
                       listener: (context, state) {
-                        if (state is AddBatchState) {
+                        if (state is AddBatchState || state is EditBatchState) {
                           if (state.submissionStatus ==
                               SubmissionStatus.success) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text("Batch added successfully")));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(
+                                    "Batch ${widget.isEdit ? 'edited' : 'added'} successfully")));
+                            context
+                                .read<AppCubit>()
+                                .appPageChaged(const ViewBatchScreen());
                           } else if (state.submissionStatus ==
                               SubmissionStatus.failure) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text("Failed to add batch")));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(
+                                    "Failed to ${widget.isEdit ? 'edit' : 'add'} details")));
                           }
                         }
                       },
                       builder: (context, state) {
-                        if (state is AddBatchState &&
+                        if ((state is AddBatchState ||
+                                state is EditBatchState) &&
                             state.submissionStatus ==
                                 SubmissionStatus.inProgress) {
                           return const Center(
@@ -184,8 +218,14 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
                                     .toList(),
                                 makeId: selectedMake!.id,
                               );
-                              customerBloc
-                                  .add(AddBatchEvent(batchData: batchData));
+                              if (widget.isEdit) {
+                                batchData.id = widget.editBatch!.id;
+                                customerBloc
+                                    .add(EditBatchEvent(batchData: batchData));
+                              } else {
+                                customerBloc
+                                    .add(AddBatchEvent(batchData: batchData));
+                              }
                             }
                           },
                           child: const Text('Submit'),

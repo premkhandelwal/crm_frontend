@@ -1,9 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'harness_request.g.dart';
 
 @JsonSerializable()
-class Harness {
+class Harness extends Equatable {
   String id;
   final String name;
 
@@ -18,4 +19,7 @@ class Harness {
   String toString() {
     return name;
   }
+  
+  @override
+  List<Object?> get props => [id, name];
 }
