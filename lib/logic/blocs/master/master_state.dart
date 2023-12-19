@@ -1,35 +1,34 @@
-part of 'customer_bloc.dart';
+part of 'master_bloc.dart';
 
 @immutable
-sealed class CustomerState {
+sealed class MasterState {
   get submissionStatus => null;
 }
 
-final class CustomerInitial extends CustomerState {}
+final class MasterInitial extends MasterState {}
 
-final class AddCustomerState extends CustomerState {
+final class AddCustomerState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
 
   AddCustomerState({required this.submissionStatus});
 }
 
-final class EditCustomerState extends CustomerState {
+final class EditCustomerState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
 
   EditCustomerState({required this.submissionStatus});
 }
 
-final class DeleteCustomerState extends CustomerState {
+final class DeleteCustomerState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
   final Customer? deletedCustomer;
-  DeleteCustomerState(
-      {required this.submissionStatus, this.deletedCustomer});
+  DeleteCustomerState({required this.submissionStatus, this.deletedCustomer});
 }
 
-final class FetchCustomerState extends CustomerState {
+final class FetchCustomerState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
   final List<Customer> customerList;
@@ -38,28 +37,28 @@ final class FetchCustomerState extends CustomerState {
       {required this.submissionStatus, this.customerList = const []});
 }
 
-final class AddMakeState extends CustomerState {
+final class AddMakeState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
 
   AddMakeState({required this.submissionStatus});
 }
 
-final class EditMakeState extends CustomerState {
+final class EditMakeState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
 
   EditMakeState({required this.submissionStatus});
 }
 
-final class DeleteMakeState extends CustomerState {
+final class DeleteMakeState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
   final Make? deletedMake;
   DeleteMakeState({required this.submissionStatus, this.deletedMake});
 }
 
-final class FetchMakeState extends CustomerState {
+final class FetchMakeState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
   final List<Make> makeList;
@@ -67,29 +66,28 @@ final class FetchMakeState extends CustomerState {
   FetchMakeState({required this.submissionStatus, this.makeList = const []});
 }
 
-final class AddHarnessState extends CustomerState {
+final class AddHarnessState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
 
   AddHarnessState({required this.submissionStatus});
 }
 
-final class EditHarnessState extends CustomerState {
+final class EditHarnessState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
 
   EditHarnessState({required this.submissionStatus});
 }
 
-final class DeleteHarnessState extends CustomerState {
+final class DeleteHarnessState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
   final Harness? deletedHarness;
-  DeleteHarnessState(
-      {required this.submissionStatus, this.deletedHarness});
+  DeleteHarnessState({required this.submissionStatus, this.deletedHarness});
 }
 
-final class FetchHarnessState extends CustomerState {
+final class FetchHarnessState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
   final List<Harness> harnessList;
@@ -98,28 +96,28 @@ final class FetchHarnessState extends CustomerState {
       {required this.submissionStatus, this.harnessList = const []});
 }
 
-final class AddBmsState extends CustomerState {
+final class AddBmsState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
 
   AddBmsState({required this.submissionStatus});
 }
 
-final class EditBmsState extends CustomerState {
+final class EditBmsState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
 
   EditBmsState({required this.submissionStatus});
 }
 
-final class DeleteBmsState extends CustomerState {
+final class DeleteBmsState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
   final Bms? deletedBms;
   DeleteBmsState({required this.submissionStatus, this.deletedBms});
 }
 
-final class FetchBmsState extends CustomerState {
+final class FetchBmsState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
   final List<Bms> bmsList;
@@ -127,21 +125,21 @@ final class FetchBmsState extends CustomerState {
   FetchBmsState({required this.submissionStatus, this.bmsList = const []});
 }
 
-final class AddBatchState extends CustomerState {
+final class AddBatchState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
 
   AddBatchState({required this.submissionStatus});
 }
 
-final class EditBatchState extends CustomerState {
+final class EditBatchState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
 
   EditBatchState({required this.submissionStatus});
 }
 
-final class DeleteBatchState extends CustomerState {
+final class DeleteBatchState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
   final Batch? deletedBatch;
@@ -149,10 +147,17 @@ final class DeleteBatchState extends CustomerState {
   DeleteBatchState({required this.submissionStatus, this.deletedBatch});
 }
 
-final class FetchBatchState extends CustomerState {
+final class FetchBatchState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
   final List<Batch> batchList;
 
   FetchBatchState({required this.submissionStatus, this.batchList = const []});
+}
+
+final class AddBmsInBatchState extends MasterState {
+  @override
+  final SubmissionStatus submissionStatus;
+
+  AddBmsInBatchState({required this.submissionStatus});
 }

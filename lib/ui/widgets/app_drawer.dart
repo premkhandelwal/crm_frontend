@@ -1,4 +1,6 @@
 import 'package:crm/logic/cubits/app/app_cubit.dart';
+import 'package:crm/ui/screens/add_screens/add_bms_in_batch_screen.dart';
+import 'package:crm/ui/screens/add_screens/add_complaint_screen.dart';
 import 'package:crm/ui/screens/dashboard_screen.dart';
 import 'package:crm/ui/screens/view_screen.dart/view_batch_screen.dart';
 import 'package:crm/ui/screens/view_screen.dart/view_bms_screen.dart';
@@ -65,6 +67,14 @@ class _AppDrawerState extends State<AppDrawer> {
             },
           ),
           ListTile(
+            leading: Icon(Icons.folder_copy_outlined,
+                color: Theme.of(context).primaryColor),
+            title: const Text("Batch"),
+            onTap: () {
+              appCubit.appPageChaged(const ViewBatchScreen());
+            },
+          ),
+          ListTile(
             leading: Icon(Icons.person_3_outlined,
                 color: Theme.of(context).primaryColor),
             title: const Text("Make"),
@@ -86,15 +96,21 @@ class _AppDrawerState extends State<AppDrawer> {
               appCubit.appPageChaged(const ViewBmsScreen());
             },
           ),
-          ListTile(
-            leading: Icon(Icons.folder_copy_outlined,
-                color: Theme.of(context).primaryColor),
-            title: const Text("Batch"),
-            onTap: () {
-              appCubit.appPageChaged(const ViewBatchScreen());
-            },
-          ),
         ],
+      ),
+      ListTile(
+        leading: Icon(Icons.circle, color: Theme.of(context).primaryColor),
+        title: const Text("Add BMS in Batch"),
+        onTap: () {
+          appCubit.appPageChaged(const AddBmsInBatchScreen());
+        },
+      ),
+      ListTile(
+        leading: Icon(Icons.circle, color: Theme.of(context).primaryColor),
+        title: const Text("Add Complaint"),
+        onTap: () {
+          appCubit.appPageChaged(const AddComplaintScreen());
+        },
       ),
     ];
   }

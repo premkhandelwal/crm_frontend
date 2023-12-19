@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -5,24 +6,28 @@ part 'complaint_request.g.dart';
 
 @JsonSerializable()
 class Complaint extends Equatable {
-  String bmsClientName;
-  String bmsName;
-  DateTime returnDate;
-  String complaint;
-  String batchNo;
-  List<String> harnessDetails; // Assuming details are key-value pairs
-  String make;
-  String customerId;
+  final String customerId;
+  final String batchId;
+  final String bmsId;
+  final DateTime returnDate;
+  final String complaint;
+  final String observation;
+  final String comment;
+  final String solution;
+  final String testingDoneBy;
+  final String status;
 
-  Complaint({
-    required this.bmsClientName,
-    required this.bmsName,
+  const Complaint({
+    required this.customerId,
+    required this.batchId,
+    required this.bmsId,
     required this.returnDate,
     required this.complaint,
-    required this.batchNo,
-    required this.harnessDetails,
-    required this.make,
-    required this.customerId,
+    required this.observation,
+    required this.comment,
+    required this.solution,
+    required this.testingDoneBy,
+    required this.status,
   });
 
   factory Complaint.fromJson(Map<String, dynamic> json) =>
@@ -31,14 +36,6 @@ class Complaint extends Equatable {
   Map<String, dynamic> toJson() => _$ComplaintToJson(this);
 
   @override
-  List<Object?> get props => [
-        bmsClientName,
-        bmsName,
-        returnDate,
-        complaint,
-        batchNo,
-        harnessDetails,
-        make,
-        customerId
-      ];
+  List<Object?> get props =>
+      [bmsId, returnDate, complaint, batchId, customerId];
 }

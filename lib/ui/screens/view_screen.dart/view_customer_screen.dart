@@ -1,5 +1,5 @@
 import 'package:crm/enums.dart';
-import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/customer_request.dart';
 import 'package:crm/ui/screens/add_screens/add_customer_screen.dart';
@@ -16,14 +16,14 @@ class ViewCustomerScreen extends StatefulWidget {
 }
 
 class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
-  late CustomerBloc customerBloc;
+  late MasterBloc masterBloc;
   late AppCubit appCubit;
 
   @override
   void initState() {
-    customerBloc = BlocProvider.of<CustomerBloc>(context);
+    masterBloc = BlocProvider.of<MasterBloc>(context);
     appCubit = BlocProvider.of<AppCubit>(context);
-    customerBloc.add(FetchCustomerEvent());
+    masterBloc.add(FetchCustomerEvent());
     super.initState();
   }
 
@@ -33,7 +33,7 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
       appBar: AppBar(
         title: const Text("View Customers"),
       ),
-      body: BlocConsumer<CustomerBloc, CustomerState>(
+      body: BlocConsumer<MasterBloc, MasterState>(
         listener: (context, customerState) {
           if (customerState is FetchCustomerState &&
               customerState.submissionStatus == SubmissionStatus.success) {
@@ -70,7 +70,7 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                         DataCell(IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () {
-                            customerBloc.add(
+                            masterBloc.add(
                                 DeleteCustomerEvent(customerData: customer));
                           },
                         )),

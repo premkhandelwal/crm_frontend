@@ -1,5 +1,5 @@
 import 'package:crm/enums.dart';
-import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/bms_request.dart';
 import 'package:crm/ui/screens/add_screens/add_bms_screen.dart';
@@ -20,7 +20,7 @@ class _ViewBmsScreenState extends State<ViewBmsScreen> {
   @override
   void initState() {
     appCubit = context.read<AppCubit>();
-    context.read<CustomerBloc>().add(FetchBmsEvent());
+    context.read<MasterBloc>().add(FetchBmsEvent());
     super.initState();
   }
 
@@ -30,7 +30,7 @@ class _ViewBmsScreenState extends State<ViewBmsScreen> {
       appBar: AppBar(
         title: const Text("View Bms"),
       ),
-      body: BlocConsumer<CustomerBloc, CustomerState>(
+      body: BlocConsumer<MasterBloc, MasterState>(
         listener: (context, bmsState) {
           if (bmsState is FetchBmsState &&
               bmsState.submissionStatus == SubmissionStatus.success) {
@@ -71,7 +71,7 @@ class _ViewBmsScreenState extends State<ViewBmsScreen> {
                           icon: const Icon(Icons.delete),
                           onPressed: () {
                             context
-                                .read<CustomerBloc>()
+                                .read<MasterBloc>()
                                 .add(DeleteBmsEvent(bmsData: bms));
                           },
                         )),

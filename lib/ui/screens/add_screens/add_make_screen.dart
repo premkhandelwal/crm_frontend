@@ -1,5 +1,5 @@
 import 'package:crm/enums.dart';
-import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/make_request.dart';
 import 'package:crm/ui/screens/view_screen.dart/view_make_screen.dart';
@@ -21,14 +21,14 @@ class _AddMakeScreenState extends State<AddMakeScreen> {
 
   TextEditingController makeNameController = TextEditingController();
 
-  late CustomerBloc customerBloc;
+  late MasterBloc masterBloc;
 
   @override
   void initState() {
     if (widget.isEdit) {
       makeNameController.text = widget.editMakeData!.name;
     }
-    customerBloc = BlocProvider.of<CustomerBloc>(context);
+    masterBloc = BlocProvider.of<MasterBloc>(context);
     super.initState();
   }
 
@@ -53,7 +53,7 @@ class _AddMakeScreenState extends State<AddMakeScreen> {
                 ),
                 const SizedBox(height: 10),
                 const SizedBox(height: 20),
-                BlocConsumer<CustomerBloc, CustomerState>(
+                BlocConsumer<MasterBloc, MasterState>(
                   listener: (context, state) {
                     if (state is AddMakeState || state is EditMakeState) {
                       if (state.submissionStatus == SubmissionStatus.success) {
@@ -85,12 +85,13 @@ class _AddMakeScreenState extends State<AddMakeScreen> {
                           // Access the form field values using the controllers
                           Make makeData = Make(name: makeNameController.text);
                           if (widget.isEdit) {
-                            makeData.id = widget.editMakeData!.id;
-                            customerBloc.add(EditMakeEvent(
+                            makeData =
+                                makeData.copyWith(id: widget.editMakeData!.id);
+                            masterBloc.add(EditMakeEvent(
                               makeData: makeData,
                             ));
                           } else {
-                            customerBloc.add(AddMakeEvent(makeData: makeData));
+                            masterBloc.add(AddMakeEvent(makeData: makeData));
                           }
                         }
                       },

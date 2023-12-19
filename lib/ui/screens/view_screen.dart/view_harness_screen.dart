@@ -1,5 +1,5 @@
 import 'package:crm/enums.dart';
-import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/harness_request.dart';
 import 'package:crm/ui/screens/add_screens/add_harness_screen.dart';
@@ -20,7 +20,7 @@ class _ViewHarnessScreenState extends State<ViewHarnessScreen> {
   @override
   void initState() {
     appCubit = context.read<AppCubit>();
-    context.read<CustomerBloc>().add(FetchHarnessEvent());
+    context.read<MasterBloc>().add(FetchHarnessEvent());
     super.initState();
   }
 
@@ -30,7 +30,7 @@ class _ViewHarnessScreenState extends State<ViewHarnessScreen> {
       appBar: AppBar(
         title: const Text("View Harness"),
       ),
-      body: BlocConsumer<CustomerBloc, CustomerState>(
+      body: BlocConsumer<MasterBloc, MasterState>(
         listener: (context, harnessState) {
           if (harnessState is FetchHarnessState &&
               harnessState.submissionStatus == SubmissionStatus.success) {
@@ -69,7 +69,7 @@ class _ViewHarnessScreenState extends State<ViewHarnessScreen> {
                           icon: const Icon(Icons.delete),
                           onPressed: () {
                             context
-                                .read<CustomerBloc>()
+                                .read<MasterBloc>()
                                 .add(DeleteHarnessEvent(harnessData: harness));
                           },
                         )),

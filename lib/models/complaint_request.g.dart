@@ -7,25 +7,27 @@ part of 'complaint_request.dart';
 // **************************************************************************
 
 Complaint _$ComplaintFromJson(Map<String, dynamic> json) => Complaint(
-      bmsClientName: json['bmsClientName'] as String,
-      bmsName: json['bmsName'] as String,
+      customerId: json['customerId'] as String,
+      batchId: json['batchId'] as String,
+      bmsId: json['bmsId'] as String,
       returnDate: DateTime.parse(json['returnDate'] as String),
       complaint: json['complaint'] as String,
-      batchNo: json['batchNo'] as String,
-      harnessDetails: (json['harnessDetails'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      make: json['make'] as String,
-      customerId: json['customerId'] as String,
+      observation: json['observation'] as String,
+      comment: json['comment'] as String,
+      solution: json['solution'] as String,
+      testingDoneBy: json['testingDoneBy'] as String,
+      status: json['status'] as String,
     );
 
 Map<String, dynamic> _$ComplaintToJson(Complaint instance) => <String, dynamic>{
-      'bmsClientName': instance.bmsClientName,
-      'bmsName': instance.bmsName,
+      'customerId': instance.customerId,
+      'batchId': instance.batchId,
+      'bmsId': instance.bmsId,
       'returnDate': instance.returnDate.toIso8601String(),
       'complaint': instance.complaint,
-      'batchNo': instance.batchNo,
-      'harnessDetails': instance.harnessDetails,
-      'make': instance.make,
-      'customerId': instance.customerId,
+      'observation': instance.observation,
+      'comment': instance.comment,
+      'solution': instance.solution,
+      'testingDoneBy': instance.testingDoneBy,
+      'status': instance.status,
     };

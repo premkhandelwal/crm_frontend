@@ -1,5 +1,4 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:bloc/bloc.dart';
 import 'package:crm/enums.dart';
 import 'package:crm/models/batch_request.dart';
 import 'package:crm/models/bms_request.dart';
@@ -7,17 +6,18 @@ import 'package:crm/models/customer_request.dart';
 import 'package:crm/models/harness_request.dart';
 import 'package:crm/models/make_request.dart';
 import 'package:crm/providers/api_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 
-part 'customer_event.dart';
-part 'customer_state.dart';
+part 'master_event.dart';
+part 'master_state.dart';
 
-class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
+class MasterBloc extends Bloc<MasterEvent, MasterState> {
   final ApiProvider apiProvider;
-  CustomerBloc(
+  MasterBloc(
     this.apiProvider,
-  ) : super(CustomerInitial()) {
-    on<CustomerEvent>((event, emit) {
+  ) : super(MasterInitial()) {
+    on<MasterEvent>((event, emit) {
       void addCustomer(Customer customerData) async {
         try {
           emit(AddCustomerState(submissionStatus: SubmissionStatus.inProgress));
@@ -240,6 +240,17 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
         }
       }
 
+      void addBmsInBatch(Batch batch) async {
+        try {
+          emit(AddBmsInBatchState(
+              submissionStatus: SubmissionStatus.inProgress));
+          await apiProvider.addBmsInBatch(batch);
+          emit(AddBmsInBatchState(submissionStatus: SubmissionStatus.success));
+        } catch (e) {
+          emit(AddBmsInBatchState(submissionStatus: SubmissionStatus.failure));
+        }
+      }
+
       switch (event.runtimeType) {
         case AddCustomerEvent:
           event as AddCustomerEvent;
@@ -296,6 +307,9 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
           return deleteBatch(event.batchData);
         case FetchBatchEvent:
           return fetchAllBatch();
+        case AddBmsInBatchEvent:
+          event as AddBmsInBatchEvent;
+          return addBmsInBatch(event.batchData);
         default:
       }
     });

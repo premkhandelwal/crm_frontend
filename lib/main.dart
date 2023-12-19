@@ -1,5 +1,5 @@
-import 'package:crm/logic/blocs/complaint/complaint_bloc.dart';
-import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/blocs/info/info_bloc.dart';
+import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/navigation/route_registry.dart';
 import 'package:crm/providers/api_provider.dart';
@@ -22,10 +22,10 @@ class MyApp extends StatelessWidget {
           create: (context) => AppCubit(),
         ),
         BlocProvider(
-          create: (context) => ComplaintBloc(ApiProvider()),
+          create: (context) => InfoBloc(ApiProvider()),
         ),
         BlocProvider(
-          create: (context) => CustomerBloc(ApiProvider()),
+          create: (context) => MasterBloc(ApiProvider()),
         )
       ],
       child: MaterialApp(

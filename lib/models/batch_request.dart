@@ -6,19 +6,15 @@ part 'batch_request.g.dart';
 
 @JsonSerializable()
 class Batch extends Equatable {
-  String id;
+  final String id;
+  final List<String> bmsList;
   final String batchName;
-  final String bmsId;
-  final List<String> harnessDetails;
-  final String makeId;
   final String customerId;
 
-  Batch({
+  const Batch({
     this.id = "",
+    this.bmsList = const [],
     required this.batchName,
-    required this.bmsId,
-    required this.harnessDetails,
-    required this.makeId,
     required this.customerId,
   });
 
@@ -32,6 +28,17 @@ class Batch extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, batchName, bmsId, harnessDetails, makeId, customerId];
+  List<Object?> get props => [id, batchName, customerId];
+
+  Batch copyWith({
+    String? id,
+    String? batchName,
+    String? customerId,
+  }) {
+    return Batch(
+      id: id ?? this.id,
+      batchName: batchName ?? this.batchName,
+      customerId: customerId ?? this.customerId,
+    );
+  }
 }

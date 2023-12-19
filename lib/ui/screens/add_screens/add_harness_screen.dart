@@ -1,5 +1,5 @@
 import 'package:crm/enums.dart';
-import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/harness_request.dart';
 import 'package:crm/ui/screens/view_screen.dart/view_harness_screen.dart';
@@ -21,14 +21,14 @@ class _AddHarnessScreenState extends State<AddHarnessScreen> {
 
   TextEditingController harnessNameController = TextEditingController();
 
-  late CustomerBloc customerBloc;
+  late MasterBloc masterBloc;
 
   @override
   void initState() {
     if (widget.isEdit) {
       harnessNameController.text = widget.editHarnessData!.name;
     }
-    customerBloc = BlocProvider.of<CustomerBloc>(context);
+    masterBloc = BlocProvider.of<MasterBloc>(context);
     super.initState();
   }
 
@@ -53,7 +53,7 @@ class _AddHarnessScreenState extends State<AddHarnessScreen> {
                 ),
                 const SizedBox(height: 10),
                 const SizedBox(height: 20),
-                BlocConsumer<CustomerBloc, CustomerState>(
+                BlocConsumer<MasterBloc, MasterState>(
                   listener: (context, state) {
                     if (state is AddHarnessState || state is EditHarnessState) {
                       if (state.submissionStatus == SubmissionStatus.success) {
@@ -87,12 +87,13 @@ class _AddHarnessScreenState extends State<AddHarnessScreen> {
                           Harness harnessData =
                               Harness(name: harnessNameController.text);
                           if (widget.isEdit) {
-                            harnessData.id = widget.editHarnessData!.id;
-                            customerBloc.add(EditHarnessEvent(
+                            harnessData = harnessData.copyWith(
+                                id: widget.editHarnessData!.id);
+                            masterBloc.add(EditHarnessEvent(
                               harnessData: harnessData,
                             ));
                           } else {
-                            customerBloc
+                            masterBloc
                                 .add(AddHarnessEvent(harnessData: harnessData));
                           }
                         }

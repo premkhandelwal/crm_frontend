@@ -1,5 +1,5 @@
 import 'package:crm/enums.dart';
-import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/customer_request.dart';
 import 'package:crm/ui/screens/view_screen.dart/view_customer_screen.dart';
@@ -22,14 +22,14 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 
   TextEditingController customerNameController = TextEditingController();
 
-  late CustomerBloc customerBloc;
+  late MasterBloc masterBloc;
 
   @override
   void initState() {
     if (widget.isEdit) {
       customerNameController.text = widget.editCustomerData!.name;
     }
-    customerBloc = BlocProvider.of<CustomerBloc>(context);
+    masterBloc = BlocProvider.of<MasterBloc>(context);
     super.initState();
   }
 
@@ -54,7 +54,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ),
                 const SizedBox(height: 10),
                 const SizedBox(height: 20),
-                BlocConsumer<CustomerBloc, CustomerState>(
+                BlocConsumer<MasterBloc, MasterState>(
                   listener: (context, state) {
                     if (state is AddCustomerState ||
                         state is EditCustomerState) {
@@ -90,12 +90,13 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                             name: customerNameController.text,
                           );
                           if (widget.isEdit) {
-                            customerData.id = widget.editCustomerData!.id;
-                            customerBloc.add(EditCustomerEvent(
+                            customerData = customerData.copyWith(
+                                id: widget.editCustomerData!.id);
+                            masterBloc.add(EditCustomerEvent(
                               customerData: customerData,
                             ));
                           } else {
-                            customerBloc.add(
+                            masterBloc.add(
                                 AddCustomerEvent(customerData: customerData));
                           }
                         }

@@ -1,5 +1,5 @@
 import 'package:crm/enums.dart';
-import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/batch_request.dart';
 import 'package:crm/ui/screens/add_screens/add_batch_screen.dart';
@@ -21,7 +21,7 @@ class _ViewBatchScreenState extends State<ViewBatchScreen> {
   @override
   void initState() {
     appCubit = BlocProvider.of<AppCubit>(context);
-    context.read<CustomerBloc>().add(FetchBatchEvent());
+    context.read<MasterBloc>().add(FetchBatchEvent());
     super.initState();
   }
 
@@ -31,7 +31,7 @@ class _ViewBatchScreenState extends State<ViewBatchScreen> {
       appBar: AppBar(
         title: const Text("View Batch"),
       ),
-      body: BlocConsumer<CustomerBloc, CustomerState>(
+      body: BlocConsumer<MasterBloc, MasterState>(
         listener: (context, batchState) {
           if (batchState is FetchBatchState &&
               batchState.submissionStatus == SubmissionStatus.success) {
@@ -70,7 +70,7 @@ class _ViewBatchScreenState extends State<ViewBatchScreen> {
                           icon: const Icon(Icons.delete),
                           onPressed: () {
                             context
-                                .read<CustomerBloc>()
+                                .read<MasterBloc>()
                                 .add(DeleteBatchEvent(batchData: batch));
                           },
                         )),

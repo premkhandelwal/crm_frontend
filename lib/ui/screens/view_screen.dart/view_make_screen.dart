@@ -1,5 +1,5 @@
 import 'package:crm/enums.dart';
-import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/make_request.dart';
 import 'package:crm/ui/screens/add_screens/add_make_screen.dart';
@@ -20,7 +20,7 @@ class _ViewMakeScreenState extends State<ViewMakeScreen> {
   @override
   void initState() {
     appCubit = context.read<AppCubit>();
-    context.read<CustomerBloc>().add(FetchMakeEvent());
+    context.read<MasterBloc>().add(FetchMakeEvent());
     super.initState();
   }
 
@@ -30,7 +30,7 @@ class _ViewMakeScreenState extends State<ViewMakeScreen> {
       appBar: AppBar(
         title: const Text("View Make"),
       ),
-      body: BlocConsumer<CustomerBloc, CustomerState>(
+      body: BlocConsumer<MasterBloc, MasterState>(
         listener: (context, makeState) {
           if (makeState is FetchMakeState &&
               makeState.submissionStatus == SubmissionStatus.success) {
@@ -69,7 +69,7 @@ class _ViewMakeScreenState extends State<ViewMakeScreen> {
                           icon: const Icon(Icons.delete),
                           onPressed: () {
                             context
-                                .read<CustomerBloc>()
+                                .read<MasterBloc>()
                                 .add(DeleteMakeEvent(makeData: make));
                           },
                         )),

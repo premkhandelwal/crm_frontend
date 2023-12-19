@@ -1,22 +1,15 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:crm/enums.dart';
-import 'package:crm/logic/blocs/customer/customer_bloc.dart';
+import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/batch_request.dart';
-import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/customer_request.dart';
-import 'package:crm/models/harness_request.dart';
-import 'package:crm/models/make_request.dart';
 import 'package:crm/ui/screens/view_screen.dart/view_batch_screen.dart';
+import 'package:crm/ui/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 List<Customer> customerList = [];
-List<Bms> bmsList = [];
-List<Harness> harnessList = [];
-List<Make> makeList = [];
-
-
 
 class AddBatchScreen extends StatefulWidget {
   final bool isEdit;
@@ -34,23 +27,17 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
   TextEditingController batchNameController = TextEditingController();
   TextEditingController batchDescriptionController = TextEditingController();
 
-  late CustomerBloc customerBloc;
+  late MasterBloc masterBloc;
 
   Customer? selectedCustomer;
-  Bms? selectedBms;
-  List<Harness> selectedHarness = [];
-  Make? selectedMake;
 
   @override
   void initState() {
     if (widget.isEdit) {
       batchNameController.text = widget.editBatch!.batchName;
     }
-    customerBloc = BlocProvider.of<CustomerBloc>(context);
-    customerBloc.add(FetchBmsEvent());
-    customerBloc.add(FetchCustomerEvent());
-    customerBloc.add(FetchHarnessEvent());
-    customerBloc.add(FetchMakeEvent());
+    masterBloc = BlocProvider.of<MasterBloc>(context);
+    masterBloc.add(FetchCustomerEvent());
     super.initState();
   }
 
@@ -60,7 +47,7 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
       appBar: AppBar(
         title: Text("${widget.isEdit ? 'Edit' : 'Add'} Batch"),
       ),
-      body: BlocConsumer<CustomerBloc, CustomerState>(
+      body: BlocConsumer<MasterBloc, MasterState>(
         listener: (context, customerState) {
           if (customerState is FetchCustomerState &&
               customerState.submissionStatus == SubmissionStatus.success) {
@@ -68,30 +55,6 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
             if (widget.isEdit) {
               selectedCustomer = customerList.firstWhere(
                   (element) => element.id == widget.editBatch!.customerId);
-            }
-          } else if (customerState is FetchBmsState &&
-              customerState.submissionStatus == SubmissionStatus.success) {
-            bmsList = List.from(customerState.bmsList);
-            if (widget.isEdit) {
-              selectedBms = bmsList.firstWhere(
-                  (element) => element.id == widget.editBatch!.bmsId);
-            }
-          } else if (customerState is FetchHarnessState &&
-              customerState.submissionStatus == SubmissionStatus.success) {
-            harnessList = List.from(customerState.harnessList);
-            if (widget.isEdit) {
-              //selectedHarness
-              for (var harnessId in widget.editBatch!.harnessDetails) {
-                selectedHarness.add(harnessList
-                    .firstWhere((element) => element.id == harnessId));
-              }
-            }
-          } else if (customerState is FetchMakeState &&
-              customerState.submissionStatus == SubmissionStatus.success) {
-            makeList = List.from(customerState.makeList);
-            if (widget.isEdit) {
-              selectedMake = makeList.firstWhere(
-                  (element) => element.id == widget.editBatch!.makeId);
             }
           }
         },
@@ -110,60 +73,6 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
                       icon: Icons.person,
                     ),
                     const SizedBox(height: 10),
-                    buildDropdownFormFieldWithIcon<Bms?>(
-                      items: bmsList,
-                      value: selectedBms,
-                      onChanged: (newValue) {
-                        // Handle the value change
-                        setState(() {
-                          selectedBms = newValue;
-                        });
-                      },
-                      labelText: 'Select the BMS',
-                    ),
-                    Row(children: [
-                      const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text(
-                          'Select Harness:',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      ...harnessList.map((item) {
-                        return Row(
-                          children: [
-                            Checkbox(
-                              value: selectedHarness.contains(item),
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value != null && value) {
-                                    selectedHarness.add(item);
-                                  } else {
-                                    selectedHarness.remove(item);
-                                  }
-                                });
-                              },
-                            ),
-                            Text(item.name),
-                            const SizedBox(
-                                width:
-                                    16.0), // Adjust the spacing between checkboxes
-                          ],
-                        );
-                      }).toList(),
-                    ]),
-                    buildDropdownFormFieldWithIcon<Make?>(
-                      items: makeList,
-                      value: selectedMake,
-                      onChanged: (newValue) {
-                        // Handle the value change
-                        setState(() {
-                          selectedMake = newValue;
-                        });
-                      },
-                      labelText: 'Select the Make',
-                    ),
                     buildDropdownFormFieldWithIcon<Customer?>(
                       items: customerList,
                       value: selectedCustomer,
@@ -176,7 +85,7 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
                       labelText: 'Select the Customer',
                     ),
                     const SizedBox(height: 20),
-                    BlocConsumer<CustomerBloc, CustomerState>(
+                    BlocConsumer<MasterBloc, MasterState>(
                       listener: (context, state) {
                         if (state is AddBatchState || state is EditBatchState) {
                           if (state.submissionStatus ==
@@ -211,19 +120,16 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
                               // Access the form field values using the controllers
                               Batch batchData = Batch(
                                 batchName: batchNameController.text,
-                                bmsId: selectedBms!.id,
                                 customerId: selectedCustomer!.id,
-                                harnessDetails: selectedHarness
-                                    .map((harness) => harness.id)
-                                    .toList(),
-                                makeId: selectedMake!.id,
                               );
                               if (widget.isEdit) {
-                                batchData.id = widget.editBatch!.id;
-                                customerBloc
+                                batchData = batchData.copyWith(
+                                    id: widget.editBatch!.id);
+
+                                masterBloc
                                     .add(EditBatchEvent(batchData: batchData));
                               } else {
-                                customerBloc
+                                masterBloc
                                     .add(AddBatchEvent(batchData: batchData));
                               }
                             }
@@ -260,34 +166,6 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
             prefixIcon: Icon(icon),
           ),
           maxLines: maxLines,
-        ),
-      ),
-    );
-  }
-
-  Widget buildDropdownFormFieldWithIcon<T>({
-    required List<T> items,
-    required T value,
-    required void Function(T?) onChanged,
-    required String labelText,
-  }) {
-    return ListTile(
-      title: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: DropdownButtonFormField<T>(
-          value: value,
-          items: items.map((item) {
-            return DropdownMenuItem<T>(
-              value: item,
-              child: Text(item.toString()),
-            );
-          }).toList(),
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            labelText: labelText,
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.all(10.0),
-          ),
         ),
       ),
     );

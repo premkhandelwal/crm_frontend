@@ -95,13 +95,21 @@ class ApiProvider {
     List<Batch> batchList = await restApiClient.fetchBatch();
     return batchList;
   }
+  Future<List<Batch>> fetchBatchforCustomer(String customerId) async {
+    List<Batch> batchList = await restApiClient.fetchBatchforCustomer(customerId);
+    return batchList;
+  }
 
   Future addComplaint(Complaint complaint) async {
     return restApiClient.addComplaint(complaint);
   }
 
-  Future<List<Complaint>> fetchComplaints() async {
-    List<Complaint> complaintList = await restApiClient.fetchComplaints();
+  Future addBmsInBatch(Batch batch) async {
+    return restApiClient.addBmsInBatch(batch);
+  }
+
+  Future<List<Complaint>> fetchComplaints(String customerId) async {
+    List<Complaint> complaintList = await restApiClient.fetchComplaints(customerId);
     return complaintList;
   }
 }
