@@ -109,7 +109,7 @@ class _RestApiClient implements RestApiClient {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
+    const Map<String, dynamic>? _data = null;
     final _result =
         await _dio.fetch<List<dynamic>>(_setStreamType<List<Customer>>(Options(
       method: 'GET',
@@ -222,7 +222,7 @@ class _RestApiClient implements RestApiClient {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
+    const Map<String, dynamic>? _data = null;
     final _result =
         await _dio.fetch<List<dynamic>>(_setStreamType<List<Make>>(Options(
       method: 'GET',
@@ -335,7 +335,7 @@ class _RestApiClient implements RestApiClient {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
+    const Map<String, dynamic>? _data = null;
     final _result =
         await _dio.fetch<List<dynamic>>(_setStreamType<List<Harness>>(Options(
       method: 'GET',
@@ -448,7 +448,7 @@ class _RestApiClient implements RestApiClient {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
+    const Map<String, dynamic>? _data = null;
     final _result =
         await _dio.fetch<List<dynamic>>(_setStreamType<List<Bms>>(Options(
       method: 'GET',
@@ -561,7 +561,7 @@ class _RestApiClient implements RestApiClient {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
+    const Map<String, dynamic>? _data = null;
     final _result =
         await _dio.fetch<List<dynamic>>(_setStreamType<List<Batch>>(Options(
       method: 'GET',
@@ -590,7 +590,7 @@ class _RestApiClient implements RestApiClient {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'customerId': customerId};
     final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
+    const Map<String, dynamic>? _data = null;
     final _result =
         await _dio.fetch<List<dynamic>>(_setStreamType<List<Batch>>(Options(
       method: 'GET',
@@ -675,7 +675,7 @@ class _RestApiClient implements RestApiClient {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'customerId': customerId};
     final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
+    const Map<String, dynamic>? _data = null;
     final _result =
         await _dio.fetch<List<dynamic>>(_setStreamType<List<Complaint>>(Options(
       method: 'GET',

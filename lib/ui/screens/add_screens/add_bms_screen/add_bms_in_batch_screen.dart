@@ -7,6 +7,7 @@ import 'package:crm/models/batch_request.dart';
 import 'package:crm/models/bms_batch_request.dart';
 import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/customer_request.dart';
+import 'package:crm/ui/screens/add_screens/add_bms_screen/widgets/check_box_list_tile_widget.dart';
 import 'package:crm/ui/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,6 +33,8 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
   List<Batch> batchListForCustomer = [];
   List<Bms> selectedBmsList = [];
   List<BatchBms> selectedBatchBmsList = [];
+  List<bool> bmsCheckedList = [];
+  Map<Bms, List<TextEditingController>> bmsSrNoControllerMap = {};
 
   @override
   void initState() {
@@ -59,6 +62,7 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
           } else if (state is FetchBmsState &&
               state.submissionStatus == SubmissionStatus.success) {
             bmsList = List.from(state.bmsList);
+            bmsCheckedList = List.generate(bmsList.length, (index) => false);
           }
         },
         builder: (context, state) {
@@ -130,35 +134,24 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
                               child: BlocConsumer<ValueCubit, ValueState>(
                                 listener: (context, state) {
                                   if (state is SelectedBmsChangedState) {
+                                    bmsCheckedList[state.index] = state.isAdded;
                                     if (state.isAdded) {
-                                      selectedBmsList.add(state.bms);
+                                      bmsSrNoControllerMap[state.bms] = [
+                                        TextEditingController()
+                                      ];
                                     } else {
-                                      selectedBmsList.remove(state.bms);
-                                      selectedBatchBmsList.removeWhere(
-                                          (element) =>
-                                              element.bmsId == state.bms.id);
+                                      bmsSrNoControllerMap[state.bms] = [];
                                     }
                                   } else if (state
-                                      is SelectedBmsSerialNoChangedState) {
-                                    BatchBms batchBms = BatchBms(
-                                        bmsId: state.bms.id,
-                                        serialNo: state.serialNo);
-                                    if (!selectedBatchBmsList
-                                        .contains(batchBms)) {
-                                      selectedBatchBmsList.add(batchBms);
+                                      is SelectedBmsTextControllerChangedState) {
+                                    if (state.isAdded) {
+                                      bmsSrNoControllerMap[state.bms]
+                                          ?.add(TextEditingController());
+                                    } else {
+                                      bmsSrNoControllerMap[state.bms]
+                                          ?.removeAt(state.index);
                                     }
-                                  } else if (state is RemoveSerialNoState) {
-                                    BatchBms batchBms = BatchBms(
-                                        bmsId: state.bms.id,
-                                        serialNo: state.serialNo);
-                                    selectedBatchBmsList.remove(batchBms);
                                   }
-                                },
-                                buildWhen: (prev, curr) {
-                                  if (curr is SelectedBmsSerialNoChangedState) {
-                                    return true;
-                                  }
-                                  return false;
                                 },
                                 builder: (context, state) {
                                   return ListView.builder(
@@ -166,11 +159,15 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
                                     itemCount: bmsList.length,
                                     itemBuilder: (context, index) {
                                       Bms bms = bmsList[index];
-                                      
-                                      return CheckBoxListTileWidget(
+                                      bool isCheckBoxSelected =
+                                          bmsCheckedList[index];
+                                      return CheckboxListTileWidget(
+                                          index: index,
                                           bms: bms,
-                                          isSelected:
-                                              selectedBmsList.contains(bms));
+                                          isCheckBoxSelected:
+                                              isCheckBoxSelected,
+                                          bmsSrNoControllerList:
+                                              bmsSrNoControllerMap[bms] ?? []);
                                     },
                                   );
                                 },
@@ -208,16 +205,13 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
                           onPressed: () {
                             if (_formKey.currentState!.validate() &&
                                 selectedBatch != null) {
-                              for (var element in selectedBatchBmsList) {
-                                print("${element.bmsId} ${element.serialNo}");
+                              for (var element
+                                  in bmsSrNoControllerMap.entries) {
+                                print(element.key);
+                                for (var text in element.value) {
+                                  print(text.text);
+                                }
                               }
-                              /* masterBloc.add(AddBmsInBatchEvent(
-                                  batchData: Batch(
-                                      id: selectedBatch!.id,
-                                      batchName: selectedBatch!.batchName,
-                                      customerId: selectedBatch!.customerId,
-                                      bmsList: List.from(
-                                          selectedBmsList.map((e) => e.id))))); */
                             }
                           },
                           child: const Text('Submit'),
@@ -234,138 +228,5 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
     );
   }
 
-  Widget buildTextFormFieldWithIcon({
-    required TextEditingController controller,
-    required String labelText,
-    required IconData icon,
-    int maxLines = 1,
-  }) {
-    return ListTile(
-      title: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: TextFormField(
-          controller: controller,
-          decoration: InputDecoration(
-            labelText: labelText,
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.all(10.0),
-            prefixIcon: Icon(icon),
-          ),
-          maxLines: maxLines,
-        ),
-      ),
-    );
-  }
-}
-
-class CheckBoxListTileWidget extends StatefulWidget {
-  final Bms bms;
-  final bool isSelected;
-
-  const CheckBoxListTileWidget({
-    Key? key,
-    required this.bms,
-    required this.isSelected,
-  }) : super(key: key);
-
-  @override
-  _CheckBoxListTileWidgetState createState() => _CheckBoxListTileWidgetState();
-}
-
-class _CheckBoxListTileWidgetState extends State<CheckBoxListTileWidget> {
-  List<TextEditingController> controllers = [];
-  @override
-  Widget build(BuildContext context) {
-    ValueCubit valueCubit = BlocProvider.of<ValueCubit>(context);
-    bool isCheckBoxSelected = widget.isSelected;
-
-    return BlocBuilder<ValueCubit, ValueState>(
-      buildWhen: (prev, curr) {
-        if (curr.bms?.id == widget.bms.id) {
-          return true;
-        }
-        return false;
-      },
-      builder: (context, state) {
-        if (state is SelectedBmsChangedState) {
-          isCheckBoxSelected = state.isAdded;
-        }
-
-        return CheckboxListTile(
-          title: Text(
-            widget.bms.name,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.normal,
-            ),
-          ),
-          subtitle: isCheckBoxSelected
-              ? ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: controllers.length,
-                  itemBuilder: (context, ind) {
-                    FocusNode node = FocusNode();
-                    return Focus(
-                      onFocusChange: (isFocused) {
-                        if (!isFocused) {
-                          valueCubit.selectedBmsSerialNoChanged(
-                              widget.bms, controllers[ind].text);
-                        }
-                      },
-                      child: TextFormField(
-                        focusNode: node,
-                        onTap: () {
-                          
-                        },
-                        controller: controllers[ind],
-                        decoration: InputDecoration(
-                            hintText: "Enter BMS Serial Number",
-                            hintStyle: const TextStyle(color: Colors.grey),
-                            suffixIcon: ind == 0
-                                ? IconButton(
-                                    onPressed: () {
-                                      controllers.add(TextEditingController());
-                                      setState(() {});
-                                    },
-                                    icon: const Icon(Icons.add))
-                                : IconButton(
-                                    onPressed: () {
-                                      valueCubit.removeSerialNo(
-                                          widget.bms, controllers[ind].text);
-                                      controllers.removeAt(ind);
-                                    },
-                                    icon: const Icon(
-                                      Icons.remove_circle,
-                                      color: Colors.red,
-                                    ))),
-                      ),
-                    );
-                  })
-              : null,
-          value: isCheckBoxSelected,
-          onChanged: (value) {
-            if (value != null && value) {
-              // Add a new controller when the checkbox is selected
-              controllers = [TextEditingController()];
-              valueCubit.selectedBmsChanged(widget.bms, true);
-            } else {
-              controllers = [];
-              valueCubit.selectedBmsChanged(widget.bms, false);
-            }
-          },
-          controlAffinity: ListTileControlAffinity.leading,
-          activeColor: Colors.blue,
-        );
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    // Dispose of all controllers when the widget is disposed
-    for (var controller in controllers) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
+  
 }

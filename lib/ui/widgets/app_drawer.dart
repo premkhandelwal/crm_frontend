@@ -1,5 +1,5 @@
 import 'package:crm/logic/cubits/app/app_cubit.dart';
-import 'package:crm/ui/screens/add_screens/add_bms_in_batch_screen.dart';
+import 'package:crm/ui/screens/add_screens/add_bms_screen/add_bms_in_batch_screen.dart';
 import 'package:crm/ui/screens/add_screens/add_complaint_screen.dart';
 import 'package:crm/ui/screens/dashboard_screen.dart';
 import 'package:crm/ui/screens/view_screen.dart/view_batch_screen.dart';

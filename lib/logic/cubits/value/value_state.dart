@@ -6,7 +6,7 @@ sealed class ValueState extends Equatable {
   @override
   List<Object> get props => [];
 
-  Bms? get  bms => null;
+  Bms? get bms => null;
 }
 
 final class ValueInitial extends ValueState {}
@@ -15,31 +15,30 @@ final class SelectedBmsChangedState extends ValueState {
   final bool isAdded;
   @override
   final Bms bms;
+  final int index;
 
   const SelectedBmsChangedState({
     required this.isAdded,
     required this.bms,
+    required this.index,
   });
 
   @override
   List<Object> get props => [isAdded, bms];
 }
 
-final class SelectedBmsSerialNoChangedState extends ValueState {
-  final String serialNo;
+final class SelectedBmsTextControllerChangedState extends ValueState {
+  final bool isAdded;
   @override
   final Bms bms;
+  final int index;
 
-  const SelectedBmsSerialNoChangedState(
-      {required this.serialNo, required this.bms});
+  const SelectedBmsTextControllerChangedState({
+    required this.isAdded,
+    required this.bms,
+    required this.index,
+  });
 
   @override
-  List<Object> get props => [serialNo, bms];
-}
-
-final class RemoveSerialNoState extends ValueState {
-  @override
-  final Bms bms;
-  final String serialNo;
-  const RemoveSerialNoState({required this.bms, required this.serialNo});
+  List<Object> get props => [isAdded, bms];
 }
