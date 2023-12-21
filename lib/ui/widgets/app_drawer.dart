@@ -1,7 +1,6 @@
 import 'package:crm/logic/cubits/app/app_cubit.dart';
-import 'package:crm/ui/screens/add_screens/add_bms_screen/add_bms_in_batch_screen.dart';
-import 'package:crm/ui/screens/add_screens/add_complaint_screen.dart';
-import 'package:crm/ui/screens/dashboard_screen.dart';
+import 'package:crm/ui/screens/add_screens/add_bms_in_batch_screen/add_bms_in_batch_screen.dart';
+import 'package:crm/ui/screens/common_complaint_screen.dart';
 import 'package:crm/ui/screens/view_screen.dart/view_batch_screen.dart';
 import 'package:crm/ui/screens/view_screen.dart/view_bms_screen.dart';
 import 'package:crm/ui/screens/view_screen.dart/view_customer_screen.dart';
@@ -48,7 +47,9 @@ class _AppDrawerState extends State<AppDrawer> {
         leading: Icon(Icons.dashboard, color: Theme.of(context).primaryColor),
         title: const Text("Dashboard"),
         onTap: () {
-          appCubit.appPageChaged(const DashBoardScreen());
+          appCubit.appPageChaged(const CommonComplaintScreen(
+            isDashBoard: true,
+          ));
         },
       ),
       ExpansionTile(
@@ -109,7 +110,9 @@ class _AppDrawerState extends State<AppDrawer> {
         leading: Icon(Icons.circle, color: Theme.of(context).primaryColor),
         title: const Text("Add Complaint"),
         onTap: () {
-          appCubit.appPageChaged(const AddComplaintScreen());
+          appCubit.appPageChaged(const CommonComplaintScreen(
+            isDashBoard: false,
+          ));
         },
       ),
     ];

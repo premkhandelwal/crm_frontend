@@ -2,12 +2,11 @@
 import 'package:crm/enums.dart';
 import 'package:crm/logic/blocs/info/info_bloc.dart';
 import 'package:crm/logic/blocs/master/master_bloc.dart';
-import 'package:crm/logic/cubits/value/value_cubit.dart';
+import 'package:crm/logic/cubits/bmsValue/bms_value_cubit.dart';
 import 'package:crm/models/batch_request.dart';
-import 'package:crm/models/bms_batch_request.dart';
 import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/customer_request.dart';
-import 'package:crm/ui/screens/add_screens/add_bms_screen/widgets/check_box_list_tile_widget.dart';
+import 'package:crm/ui/screens/add_screens/add_bms_in_batch_screen/widgets/check_box_list_tile_widget.dart';
 import 'package:crm/ui/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,9 +31,8 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
   Customer? selectedCustomer;
   List<Batch> batchListForCustomer = [];
   List<Bms> selectedBmsList = [];
-  List<BatchBms> selectedBatchBmsList = [];
   List<bool> bmsCheckedList = [];
-  Map<Bms, List<TextEditingController>> bmsSrNoControllerMap = {};
+  Map<String, List<TextEditingController>> bmsSrNoControllerMap = {};
 
   @override
   void initState() {
@@ -131,24 +129,24 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
                                 border: Border.all(color: Colors.grey.shade300),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: BlocConsumer<ValueCubit, ValueState>(
+                              child: BlocConsumer<BmsValueCubit, BmsValueState>(
                                 listener: (context, state) {
                                   if (state is SelectedBmsChangedState) {
                                     bmsCheckedList[state.index] = state.isAdded;
                                     if (state.isAdded) {
-                                      bmsSrNoControllerMap[state.bms] = [
+                                      bmsSrNoControllerMap[state.bms.id] = [
                                         TextEditingController()
                                       ];
                                     } else {
-                                      bmsSrNoControllerMap[state.bms] = [];
+                                      bmsSrNoControllerMap.remove(state.bms.id);
                                     }
                                   } else if (state
                                       is SelectedBmsTextControllerChangedState) {
                                     if (state.isAdded) {
-                                      bmsSrNoControllerMap[state.bms]
+                                      bmsSrNoControllerMap[state.bms.id]
                                           ?.add(TextEditingController());
                                     } else {
-                                      bmsSrNoControllerMap[state.bms]
+                                      bmsSrNoControllerMap[state.bms.id]
                                           ?.removeAt(state.index);
                                     }
                                   }
@@ -167,7 +165,8 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
                                           isCheckBoxSelected:
                                               isCheckBoxSelected,
                                           bmsSrNoControllerList:
-                                              bmsSrNoControllerMap[bms] ?? []);
+                                              bmsSrNoControllerMap[bms.id] ??
+                                                  []);
                                     },
                                   );
                                 },
@@ -205,13 +204,13 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
                           onPressed: () {
                             if (_formKey.currentState!.validate() &&
                                 selectedBatch != null) {
-                              for (var element
-                                  in bmsSrNoControllerMap.entries) {
-                                print(element.key);
-                                for (var text in element.value) {
-                                  print(text.text);
-                                }
-                              }
+                              masterBloc.add(AddBmsInBatchEvent(
+                                  batchData: Batch(
+                                      id: selectedBatch!.id,
+                                      batchName: selectedBatch!.batchName,
+                                      customerId: selectedBatch!.customerId,
+                                      bmsList:
+                                          convertMap(bmsSrNoControllerMap))));
                             }
                           },
                           child: const Text('Submit'),
@@ -228,5 +227,12 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
     );
   }
 
-  
+  Map<String, List<String>> convertMap(
+      Map<String, List<TextEditingController>> inputMap) {
+    return inputMap.map((key, textEditingControllers) {
+      List<String> stringList =
+          textEditingControllers.map((controller) => controller.text).toList();
+      return MapEntry(key, stringList);
+    });
+  }
 }

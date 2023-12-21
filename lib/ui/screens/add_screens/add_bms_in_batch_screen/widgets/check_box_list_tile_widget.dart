@@ -1,6 +1,6 @@
-import 'package:crm/logic/cubits/value/value_cubit.dart';
+import 'package:crm/logic/cubits/bmsValue/bms_value_cubit.dart';
 import 'package:crm/models/bms_request.dart';
-import 'package:crm/ui/screens/add_screens/add_bms_screen/widgets/text_form_field_widget.dart';
+import 'package:crm/ui/screens/add_screens/add_bms_in_batch_screen/widgets/text_form_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -20,7 +20,7 @@ class CheckboxListTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ValueCubit valueCubit = BlocProvider.of<ValueCubit>(context);
+    final BmsValueCubit bmsValueCubit = BlocProvider.of<BmsValueCubit>(context);
     return CheckboxListTile(
       title: Text(
         bms.name,
@@ -44,9 +44,9 @@ class CheckboxListTileWidget extends StatelessWidget {
       value: isCheckBoxSelected,
       onChanged: (value) {
         if (value != null && value) {
-          valueCubit.selectedBmsChanged(bms, true, index);
+          bmsValueCubit.selectedBmsChanged(bms, true, index);
         } else {
-          valueCubit.selectedBmsChanged(bms, false, index);
+          bmsValueCubit.selectedBmsChanged(bms, false, index);
         }
       },
       controlAffinity: ListTileControlAffinity.leading,

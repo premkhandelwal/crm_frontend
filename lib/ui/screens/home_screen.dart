@@ -1,5 +1,5 @@
 import 'package:crm/logic/cubits/app/app_cubit.dart';
-import 'package:crm/ui/screens/dashboard_screen.dart';
+import 'package:crm/ui/screens/common_complaint_screen.dart';
 import 'package:crm/ui/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return Flexible(child: appState.newPage);
               }
               return const Flexible(
-                child: DashBoardScreen(),
+                child: CommonComplaintScreen(isDashBoard: true,),
               );
             },
           ),

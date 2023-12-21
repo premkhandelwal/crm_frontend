@@ -1,4 +1,4 @@
-import 'package:crm/logic/cubits/value/value_cubit.dart';
+import 'package:crm/logic/cubits/bmsValue/bms_value_cubit.dart';
 import 'package:crm/models/bms_request.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,7 +16,7 @@ class TextFormFieldWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ValueCubit valueCubit = BlocProvider.of<ValueCubit>(context);
+    final BmsValueCubit bmsValueCubit = BlocProvider.of<BmsValueCubit>(context);
 
     return TextFormField(
       onTap: () {},
@@ -27,12 +27,12 @@ class TextFormFieldWidget extends StatelessWidget {
           suffixIcon: ind == 0
               ? IconButton(
                   onPressed: () {
-                    valueCubit.selectedBmsTextControllerChanged(bms, true, ind);
+                    bmsValueCubit.selectedBmsTextControllerChanged(bms, true, ind);
                   },
                   icon: const Icon(Icons.add))
               : IconButton(
                   onPressed: () {
-                    valueCubit.selectedBmsTextControllerChanged(
+                    bmsValueCubit.selectedBmsTextControllerChanged(
                         bms, false, ind);
                   },
                   icon: const Icon(

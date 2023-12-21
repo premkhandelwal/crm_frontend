@@ -1,7 +1,7 @@
-part of 'value_cubit.dart';
+part of 'bms_value_cubit.dart';
 
-sealed class ValueState extends Equatable {
-  const ValueState();
+sealed class BmsValueState extends Equatable {
+  const BmsValueState();
 
   @override
   List<Object> get props => [];
@@ -9,9 +9,9 @@ sealed class ValueState extends Equatable {
   Bms? get bms => null;
 }
 
-final class ValueInitial extends ValueState {}
+final class ValueInitial extends BmsValueState {}
 
-final class SelectedBmsChangedState extends ValueState {
+final class SelectedBmsChangedState extends BmsValueState {
   final bool isAdded;
   @override
   final Bms bms;
@@ -27,7 +27,7 @@ final class SelectedBmsChangedState extends ValueState {
   List<Object> get props => [isAdded, bms];
 }
 
-final class SelectedBmsTextControllerChangedState extends ValueState {
+final class SelectedBmsTextControllerChangedState extends BmsValueState {
   final bool isAdded;
   @override
   final Bms bms;
