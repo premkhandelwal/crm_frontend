@@ -27,3 +27,26 @@ Widget buildDropdownFormFieldWithIcon<T>({
     ),
   );
 }
+
+Widget buildTextFormFieldWithIcon({
+  required TextEditingController controller,
+  required String labelText,
+  required IconData icon,
+  int maxLines = 1,
+}) {
+  return ListTile(
+    title: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: const OutlineInputBorder(),
+          contentPadding: const EdgeInsets.all(10.0),
+          prefixIcon: Icon(icon),
+        ),
+        maxLines: maxLines,
+      ),
+    ),
+  );
+}

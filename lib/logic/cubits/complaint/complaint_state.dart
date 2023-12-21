@@ -30,9 +30,10 @@ final class SelectedBmsChangedState extends ComplaintState {
   final Bms bms;
   final List<String> serialNoList;
 
-  const SelectedBmsChangedState({required this.bms, required this.serialNoList});
+  const SelectedBmsChangedState(
+      {required this.bms, required this.serialNoList});
   @override
-  List<Object> get props => [bms,serialNoList];
+  List<Object> get props => [bms, serialNoList];
 }
 
 final class SelectedSerialNoChangedState extends ComplaintState {
@@ -41,4 +42,12 @@ final class SelectedSerialNoChangedState extends ComplaintState {
   const SelectedSerialNoChangedState({required this.serialNo});
   @override
   List<Object> get props => [serialNo];
+}
+
+class BackButtonPressedState extends ComplaintState {
+  final int layerInd;
+
+  const BackButtonPressedState({required this.layerInd});
+  @override
+  List<Object> get props => [layerInd];
 }

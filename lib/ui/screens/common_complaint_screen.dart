@@ -30,9 +30,19 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
   late InfoBloc infoBloc;
   late ComplaintCubit complaintCubit;
 
-  final _formKey = GlobalKey<FormState>();
+  Customer? selectedCustomer;
 
- 
+  List<Batch> batchListForCustomer = [];
+  Batch? selectedBatchForCustomer;
+  Map<Bms, List<String>> bmsListForSelectedBatch = {};
+  Bms? selectedBms;
+  List<String> serialNoListforSelectedBms = [];
+  String? selectedBmsSerialNo;
+  List<Complaint> complaintsList = [];
+  int layerInd = 0;
+  Complaint? filteredComplaint;
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -47,15 +57,6 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Customer? selectedCustomer;
-
-    List<Batch> batchListForCustomer = [];
-    Batch? selectedBatchForCustomer;
-    Map<Bms, List<String>> bmsListForSelectedBatch = {};
-    Bms? selectedBms;
-    List<String> serialNoListforSelectedBms = [];
-    String? selectedBmsSerialNo;
-
     TextEditingController returnDateController = TextEditingController();
     TextEditingController complaintController = TextEditingController();
     TextEditingController commentController = TextEditingController();
@@ -72,6 +73,9 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
           if (customerState is FetchCustomerState &&
               customerState.submissionStatus == SubmissionStatus.success) {
             customers = List.from(customerState.customerList);
+          } else if (customerState is FetchBmsState &&
+              customerState.submissionStatus == SubmissionStatus.success) {
+            bmsList = List.from(customerState.bmsList);
           }
         },
         builder: (context, customerState) {
@@ -92,10 +96,15 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
           return BlocConsumer<ComplaintCubit, ComplaintState>(
             listener: (context, complaintState) {
               if (complaintState is SelectedCustomerChangedState) {
+                layerInd = 1; //Into the Batch screen
                 selectedCustomer = complaintState.customer;
                 infoBloc.add(FetchBatchForCustomerEvent(
                     customerId: complaintState.customer.id));
+                infoBloc.add(FetchComplaintsEvent(
+                    customerId: complaintState.customer.id));
               } else if (complaintState is SelectedBatchChangedState) {
+                layerInd = 2; //Into the Bms screen
+
                 selectedBatchForCustomer = complaintState.batch;
                 bmsListForSelectedBatch = {};
                 bmsListForSelectedBatch =
@@ -104,10 +113,34 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                   return MapEntry(bms, value);
                 });
               } else if (complaintState is SelectedBmsChangedState) {
+                layerInd = 3; //Into the Serial No screen
                 selectedBms = complaintState.bms;
                 serialNoListforSelectedBms = complaintState.serialNoList;
               } else if (complaintState is SelectedSerialNoChangedState) {
+                layerInd = 4; //Into the Complaint screen
                 selectedBmsSerialNo = complaintState.serialNo;
+                if (widget.isDashBoard) {
+                  int complaintInd = complaintsList.indexWhere(
+                    (element) {
+                      return element.customerId == selectedCustomer?.id &&
+                          element.batchId == selectedBatchForCustomer?.id &&
+                          element.bmsId == selectedBms?.id &&
+                          element.bmsSerialNo == selectedBmsSerialNo;
+                    },
+                  );
+
+                  if (complaintInd != -1) {
+                    filteredComplaint = complaintsList[complaintInd];
+                    commentController.text = filteredComplaint!.comment;
+                    complaintController.text = filteredComplaint!.complaint;
+                    observationController.text = filteredComplaint!.observation;
+                    returnDateController.text =
+                        filteredComplaint!.returnDate.toString();
+                    solutionController.text = filteredComplaint!.solution;
+                    testingDoneByController.text =
+                        filteredComplaint!.testingDoneBy;
+                  }
+                }
               }
             },
             builder: (context, state) {
@@ -119,6 +152,7 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        //Go back button code
                         if (selectedCustomer != null)
                           Column(
                             children: [
@@ -126,16 +160,23 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                 children: [
                                   ElevatedButton(
                                       onPressed: () {
-                                        setState(() {
-                                          if (selectedBms != null) {
-                                            selectedBms = null;
-                                          } else if (selectedBatchForCustomer !=
-                                              null) {
-                                            selectedBatchForCustomer = null;
-                                          } else {
-                                            selectedCustomer = null;
-                                          }
-                                        });
+                                        if (selectedBmsSerialNo != null) {
+                                          layerInd = 3;
+                                          selectedBmsSerialNo = null;
+                                        } else if (selectedBms != null) {
+                                          layerInd = 2;
+                                          selectedBms = null;
+                                        } else if (selectedBatchForCustomer !=
+                                            null) {
+                                          layerInd = 1;
+                                          selectedBatchForCustomer = null;
+                                        } else {
+                                          layerInd = 0;
+                                          selectedCustomer = null;
+                                        }
+                                        filteredComplaint = null;
+                                        complaintCubit
+                                            .backButtonPressed(layerInd);
                                       },
                                       child: const Text("Go back")),
                                 ],
@@ -145,20 +186,17 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                               ),
                             ],
                           ),
-                        Center(
-                          child: Text(
-                            selectedCustomer == null
-                                ? "Select the customer:"
-                                : selectedBatchForCustomer == null
-                                    ? "Select the batch:"
-                                    : selectedBms == null
-                                        ? "Select the bms:"
-                                        : widget.isDashBoard
-                                            ? 'Complaint Details:'
-                                            : "Fill the details:",
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                        ),
+                        //User action
+                        (layerInd == 4 &&
+                                filteredComplaint == null &&
+                                (widget.isDashBoard))
+                            ? Container()
+                            : buildUserActionDescription(
+                                selectedCustomer,
+                                selectedBatchForCustomer,
+                                selectedBms,
+                                selectedBmsSerialNo,
+                                widget.isDashBoard),
                         const SizedBox(
                           height: 10,
                         ),
@@ -169,24 +207,8 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: selectedCustomer == null
-                                ? BlocConsumer<MasterBloc, MasterState>(
-                                    listener: (context, state) {
-                                      if (state is FetchCustomerState &&
-                                          state.submissionStatus ==
-                                              SubmissionStatus.success) {
-                                        customers =
-                                            List.from(state.customerList);
-                                      } else if (state is FetchBmsState &&
-                                          state.submissionStatus ==
-                                              SubmissionStatus.success) {
-                                        bmsList = List.from(state.bmsList);
-                                      }
-                                    },
-                                    builder: (context, state) {
-                                      return buildCustomerWidget(
-                                          customers, widget.isDashBoard);
-                                    },
-                                  )
+                                ? buildCustomerWidget(
+                                    customers, widget.isDashBoard)
                                 : BlocConsumer<InfoBloc, InfoState>(
                                     listener: (context, state) {
                                       if (state is FetchBatchForCustomerState &&
@@ -194,99 +216,33 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                               SubmissionStatus.success) {
                                         batchListForCustomer =
                                             List.from(state.batchList);
+                                      } else if (state is ComplaintFetchState &&
+                                          state.submissionStatus ==
+                                              SubmissionStatus.success) {
+                                        complaintsList =
+                                            List.from(state.complaintList);
                                       }
                                     },
                                     builder: (context, state) {
-                                      return selectedBatchForCustomer == null
-                                          ? buildBatchListView(
-                                              batchListForCustomer)
-                                          : selectedBms == null
-                                              ? buildBmsListView(
-                                                  bmsListForSelectedBatch
-                                                      .entries
-                                                      .toList())
-                                              : selectedBmsSerialNo == null
-                                                  ? buildBmsSerialNoListView(
-                                                      serialNoListforSelectedBms)
-                                                  : Column(
-                                                      children: [
-                                                        buildComplaintTextFields(
-                                                            commentController:
-                                                                commentController,
-                                                            complaintController:
-                                                                complaintController,
-                                                            observationController:
-                                                                observationController,
-                                                            returnDateController:
-                                                                returnDateController,
-                                                            solutionController:
-                                                                solutionController,
-                                                            testingDoneByController:
-                                                                testingDoneByController),
-                                                        BlocConsumer<InfoBloc,
-                                                            InfoState>(
-                                                          listener:
-                                                              (context, state) {
-                                                            if (state
-                                                                is ComplaintSubmitState) {
-                                                              if (state
-                                                                      .submissionStatus ==
-                                                                  SubmissionStatus
-                                                                      .success) {
-                                                                ScaffoldMessenger.of(
-                                                                        context)
-                                                                    .showSnackBar(const SnackBar(
-                                                                        content:
-                                                                            Text("Complaint added successfully")));
-                                                              } else if (state
-                                                                      .submissionStatus ==
-                                                                  SubmissionStatus
-                                                                      .failure) {
-                                                                ScaffoldMessenger.of(
-                                                                        context)
-                                                                    .showSnackBar(const SnackBar(
-                                                                        content:
-                                                                            Text("Failed to lodge complaint")));
-                                                              }
-                                                            }
-                                                          },
-                                                          builder:
-                                                              (context, state) {
-                                                            if (state
-                                                                    is ComplaintSubmitState &&
-                                                                state.submissionStatus ==
-                                                                    SubmissionStatus
-                                                                        .inProgress) {
-                                                              return const Center(
-                                                                child:
-                                                                    CircularProgressIndicator(),
-                                                              );
-                                                            }
-                                                            return widget
-                                                                    .isDashBoard
-                                                                ? Container()
-                                                                : ElevatedButton(
-                                                                    onPressed: selectedCustomer != null &&
-                                                                            selectedBatchForCustomer !=
-                                                                                null &&
-                                                                            selectedBms !=
-                                                                                null
-                                                                        ? () {
-                                                                            if (_formKey.currentState!.validate()) {
-                                                                              // Handle form submission
-                                                                              // Access the form field values using the controllers
-                                                                              Complaint complaintData = Complaint(customerId: selectedCustomer!.id, batchId: selectedBatchForCustomer!.id, bmsId: selectedBms!.id, returnDate: DateTime.parse(returnDateController.text), complaint: complaintController.text, comment: commentController.text, observation: observationController.text, solution: solutionController.text, testingDoneBy: testingDoneByController.text, status: "NOT RESOLVED");
-                                                                              infoBloc.add(ComplaintSubmitButtonPressed(complaintData: complaintData));
-                                                                            }
-                                                                          }
-                                                                        : null,
-                                                                    child: const Text(
-                                                                        'Submit'),
-                                                                  );
-                                                          },
-                                                        ),
-                                                      ],
-                                                    );
+                                      return buildOtherWidget(
+                                          batchListForCustomer,
+                                          complaintsList,
+                                          selectedBatchForCustomer,
+                                          selectedBms,
+                                          bmsListForSelectedBatch,
+                                          selectedBmsSerialNo,
+                                          serialNoListforSelectedBms,
+                                          filteredComplaint,
+                                          returnDateController,
+                                          complaintController,
+                                          observationController,
+                                          commentController,
+                                          solutionController,
+                                          testingDoneByController,
+                                          selectedCustomer,
+                                          widget.isDashBoard,
+                                          _formKey,
+                                          layerInd);
                                     },
                                   ))
                       ],

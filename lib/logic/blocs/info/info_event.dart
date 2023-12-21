@@ -11,7 +11,7 @@ class ComplaintSubmitButtonPressed extends InfoEvent {
 
 class FetchComplaintsEvent extends InfoEvent {
   final String customerId;
-
+  
   FetchComplaintsEvent({required this.customerId});
 }
 

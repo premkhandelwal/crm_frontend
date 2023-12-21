@@ -24,4 +24,8 @@ class ComplaintCubit extends Cubit<ComplaintState> {
   void selectedSerialNoChanged(String serialNo) {
     emit(SelectedSerialNoChangedState(serialNo: serialNo));
   }
+
+  void backButtonPressed(int layerInd) {
+    emit(BackButtonPressedState(layerInd: layerInd));
+  }
 }

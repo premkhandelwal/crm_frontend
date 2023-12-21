@@ -9,6 +9,7 @@ class Complaint extends Equatable {
   final String customerId;
   final String batchId;
   final String bmsId;
+  final String bmsSerialNo;
   final DateTime returnDate;
   final String complaint;
   final String observation;
@@ -21,6 +22,7 @@ class Complaint extends Equatable {
     required this.customerId,
     required this.batchId,
     required this.bmsId,
+    required this.bmsSerialNo,
     required this.returnDate,
     required this.complaint,
     required this.observation,
@@ -37,5 +39,5 @@ class Complaint extends Equatable {
 
   @override
   List<Object?> get props =>
-      [bmsId, returnDate, complaint, batchId, customerId];
+      [customerId, batchId, bmsId, bmsSerialNo];
 }
