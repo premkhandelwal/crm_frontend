@@ -67,12 +67,6 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    buildTextFormFieldWithIcon(
-                      controller: batchNameController,
-                      labelText: 'Batch Name',
-                      icon: Icons.person,
-                    ),
-                    const SizedBox(height: 10),
                     buildDropdownFormFieldWithIcon<Customer?>(
                       items: customerList,
                       value: selectedCustomer,
@@ -83,6 +77,12 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
                         });
                       },
                       labelText: 'Select the Customer',
+                    ),
+                    const SizedBox(height: 10),
+                    buildTextFormFieldWithIcon(
+                      controller: batchNameController,
+                      labelText: 'Batch Name',
+                      icon: Icons.person,
                     ),
                     const SizedBox(height: 20),
                     BlocConsumer<MasterBloc, MasterState>(

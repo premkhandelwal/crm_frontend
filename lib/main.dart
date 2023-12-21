@@ -1,6 +1,7 @@
 import 'package:crm/logic/blocs/info/info_bloc.dart';
 import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
+import 'package:crm/logic/cubits/value/value_cubit.dart';
 import 'package:crm/navigation/route_registry.dart';
 import 'package:crm/providers/api_provider.dart';
 import 'package:crm/ui/screens/home_screen.dart';
@@ -20,6 +21,9 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => AppCubit(),
+        ),
+        BlocProvider(
+          create: (context) => ValueCubit(),
         ),
         BlocProvider(
           create: (context) => InfoBloc(ApiProvider()),

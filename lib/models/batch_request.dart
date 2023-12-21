@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:crm/models/bms_batch_request.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -7,7 +8,7 @@ part 'batch_request.g.dart';
 @JsonSerializable()
 class Batch extends Equatable {
   final String id;
-  final List<String> bmsList;
+  final List<BatchBms> bmsList;
   final String batchName;
   final String customerId;
 

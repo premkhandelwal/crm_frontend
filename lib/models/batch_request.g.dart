@@ -9,7 +9,7 @@ part of 'batch_request.dart';
 Batch _$BatchFromJson(Map<String, dynamic> json) => Batch(
       id: json['id'] as String? ?? "",
       bmsList: (json['bmsList'] as List<dynamic>?)
-              ?.map((e) => e as String)
+              ?.map((e) => BatchBms.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
       batchName: json['batchName'] as String,
