@@ -3,7 +3,6 @@ import 'package:crm/models/batch_request.dart';
 import 'package:crm/models/complaint_request.dart';
 import 'package:crm/providers/api_provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meta/meta.dart';
 
 part 'info_event.dart';
 part 'info_state.dart';
@@ -44,6 +43,18 @@ class InfoBloc extends Bloc<InfoEvent, InfoState> {
         }
       }
 
+      void updateComplaintStatus(Complaint complaint) async {
+        try {
+          emit(UpdateComplaintStatusState(status: SubmissionStatus.inProgress));
+          Complaint updatedComplaint =
+              await apiProvider.updateComplaintStatus(complaint);
+          emit(UpdateComplaintStatusState(
+              status: SubmissionStatus.success, complaint: updatedComplaint));
+        } catch (e) {
+          emit(UpdateComplaintStatusState(status: SubmissionStatus.failure));
+        }
+      }
+
       switch (event.runtimeType) {
         case ComplaintSubmitButtonPressed:
           event as ComplaintSubmitButtonPressed;
@@ -54,6 +65,9 @@ class InfoBloc extends Bloc<InfoEvent, InfoState> {
         case FetchBatchForCustomerEvent:
           event as FetchBatchForCustomerEvent;
           return fetchBatchForCustomer(event.customerId);
+        case UpdateComplaintStatusEvent:
+          event as UpdateComplaintStatusEvent;
+          return updateComplaintStatus(event.complaint);
         default:
       }
     });

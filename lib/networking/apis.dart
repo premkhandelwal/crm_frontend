@@ -33,6 +33,8 @@ class Apis {
 
   static const String addComplaint = "/addDetails/addComplaint";
   static const String fetchComplaint = "/addDetails/fetchComplaints";
+  static const String updateComplaintStatus = "/addDetails/updateComplaintStatus";
+
   static const String addBmsInBatch = "/addDetails/addBmsInBatch";
   static const String fetchBatchforCustomer = "/addDetails/getBatchForCustomer";
 }

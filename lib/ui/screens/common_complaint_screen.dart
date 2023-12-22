@@ -39,6 +39,7 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
   List<String> serialNoListforSelectedBms = [];
   String? selectedBmsSerialNo;
   List<Complaint> complaintsList = [];
+  List<Complaint> filteredComplaintList = [];
   int layerInd = 0;
   Complaint? filteredComplaint;
 
@@ -106,6 +107,9 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                 layerInd = 2; //Into the Bms screen
 
                 selectedBatchForCustomer = complaintState.batch;
+                filteredComplaintList.removeWhere((element) =>
+                    element.batchId != selectedBatchForCustomer?.id);
+
                 bmsListForSelectedBatch = {};
                 bmsListForSelectedBatch =
                     complaintState.batch.bmsList.map((key, value) {
@@ -115,22 +119,21 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
               } else if (complaintState is SelectedBmsChangedState) {
                 layerInd = 3; //Into the Serial No screen
                 selectedBms = complaintState.bms;
+                filteredComplaintList
+                    .removeWhere((element) => element.bmsId != selectedBms?.id);
+
                 serialNoListforSelectedBms = complaintState.serialNoList;
               } else if (complaintState is SelectedSerialNoChangedState) {
                 layerInd = 4; //Into the Complaint screen
                 selectedBmsSerialNo = complaintState.serialNo;
-                if (widget.isDashBoard) {
-                  int complaintInd = complaintsList.indexWhere(
-                    (element) {
-                      return element.customerId == selectedCustomer?.id &&
-                          element.batchId == selectedBatchForCustomer?.id &&
-                          element.bmsId == selectedBms?.id &&
-                          element.bmsSerialNo == selectedBmsSerialNo;
-                    },
-                  );
 
-                  if (complaintInd != -1) {
-                    filteredComplaint = complaintsList[complaintInd];
+                if (widget.isDashBoard) {
+                  int indComplaint = filteredComplaintList.indexWhere(
+                      (element) => element.bmsSerialNo == selectedBmsSerialNo);
+                  if (indComplaint == -1) {
+                    filteredComplaint = null;
+                  } else {
+                    filteredComplaint = filteredComplaintList[indComplaint];
                     commentController.text = filteredComplaint!.comment;
                     complaintController.text = filteredComplaint!.complaint;
                     observationController.text = filteredComplaint!.observation;
@@ -163,18 +166,29 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                         if (selectedBmsSerialNo != null) {
                                           layerInd = 3;
                                           selectedBmsSerialNo = null;
+                                          filteredComplaintList = List.from(complaintsList
+                                              .where((element) =>
+                                                  element.bmsId ==
+                                                  selectedBms?.id));
                                         } else if (selectedBms != null) {
                                           layerInd = 2;
                                           selectedBms = null;
+                                          filteredComplaintList = List.from(complaintsList
+                                              .where((element) =>
+                                                  element.batchId ==
+                                                  selectedBatchForCustomer?.id))
+                                              ;
                                         } else if (selectedBatchForCustomer !=
                                             null) {
                                           layerInd = 1;
                                           selectedBatchForCustomer = null;
+                                          filteredComplaintList = List.from(complaintsList);
                                         } else {
                                           layerInd = 0;
                                           selectedCustomer = null;
                                         }
-                                        filteredComplaint = null;
+
+                                        // filteredComplaint = null;
                                         complaintCubit
                                             .backButtonPressed(layerInd);
                                       },
@@ -221,28 +235,85 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                               SubmissionStatus.success) {
                                         complaintsList =
                                             List.from(state.complaintList);
+                                        filteredComplaintList = List.from(complaintsList);
+                                      } else if (state
+                                              is UpdateComplaintStatusState &&
+                                          state.status ==
+                                              SubmissionStatus.success) {
+                                        int ind = -1;
+                                        if (filteredComplaint != null) {
+                                          ind = complaintsList
+                                              .indexOf(filteredComplaint!);
+                                        }
+                                        if (state.complaint != null) {
+                                          if (ind != -1) {
+                                            complaintsList[ind] =
+                                                state.complaint!;
+                                          }
+                                          filteredComplaint = state.complaint;
+                                        }
                                       }
                                     },
                                     builder: (context, state) {
-                                      return buildOtherWidget(
-                                          batchListForCustomer,
-                                          complaintsList,
-                                          selectedBatchForCustomer,
-                                          selectedBms,
-                                          bmsListForSelectedBatch,
-                                          selectedBmsSerialNo,
-                                          serialNoListforSelectedBms,
-                                          filteredComplaint,
-                                          returnDateController,
-                                          complaintController,
-                                          observationController,
-                                          commentController,
-                                          solutionController,
-                                          testingDoneByController,
-                                          selectedCustomer,
-                                          widget.isDashBoard,
-                                          _formKey,
-                                          layerInd);
+                                      return layerInd == 1
+                                          ? buildBatchListView(
+                                              batchListForCustomer,
+                                              filteredComplaintList)
+                                          : layerInd == 2
+                                              ? buildBmsListView(
+                                                  bmsListForSelectedBatch
+                                                      .entries
+                                                      .toList(),
+                                                  filteredComplaintList)
+                                              : layerInd == 3
+                                                  ? buildBmsSerialNoListView(
+                                                      serialNoListforSelectedBms,
+                                                      filteredComplaintList)
+                                                  : (layerInd == 4) &&
+                                                          (filteredComplaint !=
+                                                                  null ||
+                                                              !(widget
+                                                                  .isDashBoard))
+                                                      ? ComplaintForm(
+                                                          returnDateController:
+                                                              returnDateController,
+                                                          complaintController:
+                                                              complaintController,
+                                                          observationController:
+                                                              observationController,
+                                                          commentController:
+                                                              commentController,
+                                                          solutionController:
+                                                              solutionController,
+                                                          testingDoneByController:
+                                                              testingDoneByController,
+                                                          selectedCustomer:
+                                                              selectedCustomer,
+                                                          selectedBatchForCustomer:
+                                                              selectedBatchForCustomer,
+                                                          selectedBms:
+                                                              selectedBms,
+                                                          formKey: _formKey,
+                                                          selectedBmsSerialNo:
+                                                              selectedBmsSerialNo,
+                                                          isDashBoard: widget
+                                                              .isDashBoard,
+                                                          complaintStatus:
+                                                              filteredComplaint
+                                                                  ?.status,
+                                                          complaintId:
+                                                              filteredComplaint
+                                                                  ?.id,
+                                                        )
+                                                      : const Center(
+                                                          child: Text(
+                                                            "No complaint found!!",
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                        );
                                     },
                                   ))
                       ],

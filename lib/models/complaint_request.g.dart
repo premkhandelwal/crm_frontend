@@ -7,6 +7,7 @@ part of 'complaint_request.dart';
 // **************************************************************************
 
 Complaint _$ComplaintFromJson(Map<String, dynamic> json) => Complaint(
+      id: json['id'] as String? ?? "",
       customerId: json['customerId'] as String,
       batchId: json['batchId'] as String,
       bmsId: json['bmsId'] as String,
@@ -21,6 +22,7 @@ Complaint _$ComplaintFromJson(Map<String, dynamic> json) => Complaint(
     );
 
 Map<String, dynamic> _$ComplaintToJson(Complaint instance) => <String, dynamic>{
+      'id': instance.id,
       'customerId': instance.customerId,
       'batchId': instance.batchId,
       'bmsId': instance.bmsId,

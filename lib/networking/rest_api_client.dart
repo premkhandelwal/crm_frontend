@@ -87,4 +87,7 @@ abstract class RestApiClient {
   @GET(Apis.fetchComplaint)
   Future<List<Complaint>> fetchComplaints(
       @Query("customerId") String customerId);
+
+  @PUT(Apis.updateComplaintStatus)
+  Future<Complaint> updateComplaintStatus(@Body() Complaint complaint);
 }

@@ -1,6 +1,6 @@
 part of 'info_bloc.dart';
 
-@immutable
+
 sealed class InfoEvent {}
 
 class ComplaintSubmitButtonPressed extends InfoEvent {
@@ -11,8 +11,14 @@ class ComplaintSubmitButtonPressed extends InfoEvent {
 
 class FetchComplaintsEvent extends InfoEvent {
   final String customerId;
-  
+
   FetchComplaintsEvent({required this.customerId});
+}
+
+class UpdateComplaintStatusEvent extends InfoEvent {
+  final Complaint complaint;
+
+  UpdateComplaintStatusEvent({required this.complaint});
 }
 
 class FetchBatchForCustomerEvent extends InfoEvent {

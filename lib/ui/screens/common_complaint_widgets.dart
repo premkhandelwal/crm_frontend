@@ -80,61 +80,18 @@ Widget buildCustomerWidget(List<Customer> customers, bool isDashboard) {
   );
 }
 
-Widget buildOtherWidget(
-    List<Batch> batchListForCustomer,
-    List<Complaint> complaintsList,
-    Batch? selectedBatchForCustomer,
-    Bms? selectedBms,
-    Map<Bms, List<String>> bmsListForSelectedBatch,
-    String? selectedBmsSerialNo,
-    List<String> serialNoListforSelectedBms,
-    Complaint? filteredComplaint,
-    TextEditingController returnDateController,
-    TextEditingController complaintController,
-    TextEditingController observationController,
-    TextEditingController commentController,
-    TextEditingController solutionController,
-    TextEditingController testingDoneByController,
-    Customer? selectedCustomer,
-    bool isDashBoard,
-    GlobalKey<FormState> formKey,
-    int layerInd) {
-  return layerInd == 1
-      ? buildBatchListView(batchListForCustomer)
-      : layerInd == 2
-          ? buildBmsListView(bmsListForSelectedBatch.entries.toList())
-          : layerInd == 3
-              ? buildBmsSerialNoListView(serialNoListforSelectedBms)
-              : (layerInd == 4) && (filteredComplaint != null || !(isDashBoard))
-                  ? ComplaintForm(
-                      returnDateController: returnDateController,
-                      complaintController: complaintController,
-                      observationController: observationController,
-                      commentController: commentController,
-                      solutionController: solutionController,
-                      testingDoneByController: testingDoneByController,
-                      selectedCustomer: selectedCustomer,
-                      selectedBatchForCustomer: selectedBatchForCustomer,
-                      selectedBms: selectedBms,
-                      formKey: formKey,
-                      selectedBmsSerialNo: selectedBmsSerialNo,
-                      isDashBoard: isDashBoard,
-                      complaintStatus: filteredComplaint?.status,
-                    )
-                  : const Center(
-                      child: Text(
-                        "No complaint found!!",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    );
-}
-
-Widget buildBatchListView(List<Batch> batchListForCustomer) {
+Widget buildBatchListView(
+    List<Batch> batchListForCustomer, List<Complaint> filteredComplaintList) {
   return ListView.builder(
     shrinkWrap: true,
     itemCount: batchListForCustomer.length,
     itemBuilder: (context, index) {
       Batch batch = batchListForCustomer[index];
+      filteredComplaintList = filteredComplaintList
+          .where((element) => element.batchId == batch.id)
+          .toList();
+      double percentage =
+          calculatePercentageOfWorkCompleted(filteredComplaintList);
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 5.0),
         color: Colors.white,
@@ -161,6 +118,9 @@ Widget buildBatchListView(List<Batch> batchListForCustomer) {
                     ],
                   ),
                 ),
+                percentage.isNaN
+                    ? Container()
+                    : WorkCompletionProgress(percentage: percentage)
               ],
             ),
           ),
@@ -170,12 +130,18 @@ Widget buildBatchListView(List<Batch> batchListForCustomer) {
   );
 }
 
-Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList) {
+Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList,
+    List<Complaint> filteredComplaintList) {
   return ListView.builder(
     shrinkWrap: true,
     itemCount: bmsList.length,
     itemBuilder: (context, index) {
       Bms bms = bmsList[index].key;
+      filteredComplaintList = filteredComplaintList
+          .where((element) => element.bmsId == bms.id)
+          .toList();
+      double percentage =
+          calculatePercentageOfWorkCompleted(filteredComplaintList);
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 5.0),
         color: Colors.white,
@@ -204,6 +170,9 @@ Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList) {
                     ],
                   ),
                 ),
+                percentage.isNaN
+                    ? Container()
+                    : WorkCompletionProgress(percentage: percentage)
               ],
             ),
           ),
@@ -213,11 +182,14 @@ Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList) {
   );
 }
 
-Widget buildBmsSerialNoListView(List<String> bmsSerialNoList) {
+Widget buildBmsSerialNoListView(
+    List<String> bmsSerialNoList, List<Complaint> complaintList) {
   return ListView.builder(
     shrinkWrap: true,
     itemCount: bmsSerialNoList.length,
     itemBuilder: (context, index) {
+      int ind = complaintList.indexWhere(
+          (element) => element.bmsSerialNo == bmsSerialNoList[index]);
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 5.0),
         color: Colors.white,
@@ -246,6 +218,10 @@ Widget buildBmsSerialNoListView(List<String> bmsSerialNoList) {
                     ],
                   ),
                 ),
+                StatusDisplayWidget(
+                    complaintStatus:
+                        ind != -1 ? complaintList[index].status : null,
+                    isTappable: false)
               ],
             ),
           ),
@@ -270,7 +246,8 @@ class ComplaintForm extends StatelessWidget {
       required GlobalKey<FormState> formKey,
       required this.selectedBmsSerialNo,
       required this.isDashBoard,
-      required this.complaintStatus})
+      required this.complaintStatus,
+      required this.complaintId})
       : _formKey = formKey;
 
   final TextEditingController returnDateController;
@@ -286,60 +263,68 @@ class ComplaintForm extends StatelessWidget {
   final String? selectedBmsSerialNo;
   final bool isDashBoard;
   final String? complaintStatus;
+  final String? complaintId;
 
   @override
   Widget build(BuildContext context) {
+    Complaint complaintData = Complaint(
+      id: complaintId ?? "",
+      customerId: selectedCustomer!.id,
+      batchId: selectedBatchForCustomer!.id,
+      bmsId: selectedBms!.id,
+      bmsSerialNo: selectedBmsSerialNo!,
+      returnDate: DateTime.parse(returnDateController.text),
+      complaint: complaintController.text,
+      comment: commentController.text,
+      observation: observationController.text,
+      solution: solutionController.text,
+      testingDoneBy: testingDoneByController.text,
+      status: "Not Resolved",
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         isDashBoard
-            ? Center(
-                child: Column(
-                children: [
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  buildStatusIcon(complaintStatus),
-                  const SizedBox(
-                    height: 20,
-                  )
-                ],
-              ))
+            ? StatusDisplayWidget(
+                complaintStatus: complaintStatus,
+                complaintData: complaintData,
+                isTappable: true,
+              )
             : Container(),
         buildTextFormFieldWithIcon(
-          controller: returnDateController,
-          labelText: 'Return Date',
-          icon: Icons.calendar_today,
-        ),
+            controller: returnDateController,
+            labelText: 'Return Date',
+            icon: Icons.calendar_today,
+            readOnly: isDashBoard),
         buildTextFormFieldWithIcon(
-          controller: complaintController,
-          labelText: 'Complaint',
-          icon: Icons.description,
-          maxLines: 3,
-        ),
+            controller: complaintController,
+            labelText: 'Complaint',
+            icon: Icons.description,
+            maxLines: 3,
+            readOnly: isDashBoard),
         buildTextFormFieldWithIcon(
-          controller: observationController,
-          labelText: 'Observation',
-          icon: Icons.description,
-          maxLines: 3,
-        ),
+            controller: observationController,
+            labelText: 'Observation',
+            icon: Icons.description,
+            maxLines: 3,
+            readOnly: isDashBoard),
         buildTextFormFieldWithIcon(
-          controller: commentController,
-          labelText: 'Comment',
-          icon: Icons.description,
-          maxLines: 3,
-        ),
+            controller: commentController,
+            labelText: 'Comment',
+            icon: Icons.description,
+            maxLines: 3,
+            readOnly: isDashBoard),
         buildTextFormFieldWithIcon(
-          controller: solutionController,
-          labelText: 'Solution',
-          icon: Icons.description,
-          maxLines: 3,
-        ),
+            controller: solutionController,
+            labelText: 'Solution',
+            icon: Icons.description,
+            maxLines: 3,
+            readOnly: isDashBoard),
         buildTextFormFieldWithIcon(
-          controller: testingDoneByController,
-          labelText: 'Testing Done By',
-          icon: Icons.description,
-        ),
+            controller: testingDoneByController,
+            labelText: 'Testing Done By',
+            icon: Icons.description,
+            readOnly: isDashBoard),
         const SizedBox(height: 20),
         BlocConsumer<InfoBloc, InfoState>(
           listener: (context, state) {
@@ -370,20 +355,7 @@ class ComplaintForm extends StatelessWidget {
                             if (_formKey.currentState!.validate()) {
                               // Handle form submission
                               // Access the form field values using the controllers
-                              Complaint complaintData = Complaint(
-                                customerId: selectedCustomer!.id,
-                                batchId: selectedBatchForCustomer!.id,
-                                bmsId: selectedBms!.id,
-                                bmsSerialNo: selectedBmsSerialNo!,
-                                returnDate:
-                                    DateTime.parse(returnDateController.text),
-                                complaint: complaintController.text,
-                                comment: commentController.text,
-                                observation: observationController.text,
-                                solution: solutionController.text,
-                                testingDoneBy: testingDoneByController.text,
-                                status: "NOT RESOLVED",
-                              );
+
                               context.read<InfoBloc>().add(
                                   ComplaintSubmitButtonPressed(
                                       complaintData: complaintData));
@@ -399,10 +371,39 @@ class ComplaintForm extends StatelessWidget {
   }
 }
 
-Widget buildStatusIcon(String? status) {
-  Color color;
+class StatusDisplayWidget extends StatelessWidget {
+  const StatusDisplayWidget(
+      {super.key,
+      required this.complaintStatus,
+      this.complaintData,
+      required this.isTappable});
 
-  switch (status) {
+  final String? complaintStatus;
+  final Complaint? complaintData;
+  final bool isTappable;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: Column(
+      children: [
+        const SizedBox(
+          height: 10,
+        ),
+        buildStatusIcon(complaintStatus, context, complaintData, isTappable),
+        const SizedBox(
+          height: 20,
+        )
+      ],
+    ));
+  }
+}
+
+Widget buildStatusIcon(String? selectedStatus, BuildContext context,
+    Complaint? complaint, bool isTappable) {
+  Color? color;
+
+  switch (selectedStatus) {
     case "Not Resolved":
       color = Colors.red;
       break;
@@ -419,7 +420,7 @@ Widget buildStatusIcon(String? status) {
       color = Colors.grey;
       break;
     default:
-      color = Colors.grey;
+      color = null;
   }
 
   return Row(
@@ -428,13 +429,192 @@ Widget buildStatusIcon(String? status) {
       Container(
         width: 20,
         height: 20,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-        ),
+        decoration: color != null
+            ? BoxDecoration(
+                shape: BoxShape.circle,
+                color: color,
+              )
+            : null,
       ),
       const SizedBox(width: 8),
-      Text(status ?? "Unknown"),
+      InkWell(
+          onTap: isTappable
+              ? () async {
+                  await showDialog(
+                    context: context,
+                    builder: (context) => StatusDialog(
+                        onStatusSelected: (status) {
+                          selectedStatus = status;
+                        },
+                        currentStatus: selectedStatus,
+                        complaintData: complaint!),
+                  );
+                }
+              : null,
+          child: selectedStatus != null ? Text(selectedStatus!) : Container()),
+      const SizedBox(width: 8),
     ],
   );
+}
+
+class StatusDialog extends StatefulWidget {
+  final Function(String?) onStatusSelected;
+  final String? currentStatus;
+  final Complaint complaintData;
+
+  const StatusDialog(
+      {Key? key,
+      required this.onStatusSelected,
+      required this.currentStatus,
+      required this.complaintData})
+      : super(key: key);
+
+  @override
+  State<StatusDialog> createState() => _StatusDialogState();
+}
+
+class _StatusDialogState extends State<StatusDialog> {
+  String? selectedStatus;
+
+  // Define colors for each status
+  Map<String, Color> statusColors = {
+    'Not Resolved': Colors.red,
+    'Not Tested': Colors.orange,
+    'Completed': Colors.green,
+    'Dispatched': Colors.blue,
+    'Waste': Colors.grey,
+  };
+
+  @override
+  void initState() {
+    selectedStatus = widget.currentStatus;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Select Status'),
+      content: SingleChildScrollView(
+        child: Column(
+          children: [
+            for (var status in statusColors.keys) _buildStatusOption(status),
+          ],
+        ),
+      ),
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            context.read<InfoBloc>().add(UpdateComplaintStatusEvent(
+                complaint:
+                    widget.complaintData.copyWith(status: selectedStatus)));
+            Navigator.pop(context); // Close the dialog
+            if (selectedStatus != null) {
+              widget.onStatusSelected(selectedStatus);
+            }
+          },
+          child: const Text('Update Status'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusOption(String status) {
+    return RadioListTile<String>(
+      controlAffinity: ListTileControlAffinity.trailing,
+      title: Row(
+        children: [
+          Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: statusColors[status],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            status,
+            style: TextStyle(color: statusColors[status]),
+          ),
+        ],
+      ),
+      value: status,
+      groupValue: selectedStatus,
+      onChanged: (value) {
+        setState(() {
+          selectedStatus = value;
+        });
+      },
+    );
+  }
+}
+
+double calculatePercentageOfWorkCompleted(List<Complaint> complaintList) {
+  int totalComplaints = complaintList.length;
+  double completedWeight = 0.66;
+  double notTestedWeight = 0.33;
+  double dispatchedWeight = 1;
+  double notResolvedWeight = 0;
+  double wasteWeight = 1;
+  /* Not Resolved(0%), Not Tested(33%), Completed(66%), Dispatched(100%), Waste(Not to be considered in status)*/
+
+  double totalWeight = 0;
+
+  for (var complaint in complaintList) {
+    switch (complaint.status) {
+      case "Completed":
+        totalWeight += completedWeight;
+        break;
+      case "Not Tested":
+        totalWeight += notTestedWeight;
+        break;
+      case "Not Resolved":
+        totalWeight += notResolvedWeight;
+      case "Dispatched":
+        totalWeight += dispatchedWeight;
+      case "Waste":
+        totalWeight += wasteWeight;
+      default:
+        totalWeight += 0;
+      // Add more cases for other statuses if needed
+    }
+  }
+
+  // Calculate percentage of work completed
+  double percentageOfWorkCompleted = (totalWeight / totalComplaints) * 100;
+
+  return percentageOfWorkCompleted;
+}
+
+class WorkCompletionProgress extends StatelessWidget {
+  final double percentage;
+
+  const WorkCompletionProgress({super.key, required this.percentage});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("$percentage%"  ),
+        Flexible(
+          child: SizedBox(
+            width: 60,
+
+            child: LinearProgressIndicator(
+            minHeight: 10,
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.black,
+            backgroundColor: Colors.black,
+              value: percentage / 100,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                  Colors.green), // Change color as needed
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

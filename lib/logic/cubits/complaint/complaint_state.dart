@@ -51,3 +51,5 @@ class BackButtonPressedState extends ComplaintState {
   @override
   List<Object> get props => [layerInd];
 }
+
+class StatusDialogDisplayState extends ComplaintState {}

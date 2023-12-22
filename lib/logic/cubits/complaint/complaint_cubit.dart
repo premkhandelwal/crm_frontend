@@ -1,8 +1,8 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:crm/models/batch_request.dart';
 import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/customer_request.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'complaint_state.dart';
 
@@ -27,5 +27,9 @@ class ComplaintCubit extends Cubit<ComplaintState> {
 
   void backButtonPressed(int layerInd) {
     emit(BackButtonPressedState(layerInd: layerInd));
+  }
+
+  void showStatusDialog() {
+    emit(StatusDialogDisplayState());
   }
 }

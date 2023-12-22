@@ -32,6 +32,7 @@ Widget buildTextFormFieldWithIcon({
   required TextEditingController controller,
   required String labelText,
   required IconData icon,
+  bool readOnly = false,
   int maxLines = 1,
 }) {
   return ListTile(
@@ -39,6 +40,7 @@ Widget buildTextFormFieldWithIcon({
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
         controller: controller,
+        readOnly: readOnly,
         decoration: InputDecoration(
           labelText: labelText,
           border: const OutlineInputBorder(),
