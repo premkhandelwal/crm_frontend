@@ -16,7 +16,7 @@ class FetchComplaintsEvent extends InfoEvent {
 }
 
 class UpdateComplaintStatusEvent extends InfoEvent {
-  final Complaint complaint;
+  final Map<String, String?> complaint;
 
   UpdateComplaintStatusEvent({required this.complaint});
 }

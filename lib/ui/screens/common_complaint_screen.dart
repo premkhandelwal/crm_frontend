@@ -30,19 +30,6 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
   late InfoBloc infoBloc;
   late ComplaintCubit complaintCubit;
 
-  Customer? selectedCustomer;
-
-  List<Batch> batchListForCustomer = [];
-  Batch? selectedBatchForCustomer;
-  Map<Bms, List<String>> bmsListForSelectedBatch = {};
-  Bms? selectedBms;
-  List<String> serialNoListforSelectedBms = [];
-  String? selectedBmsSerialNo;
-  List<Complaint> complaintsList = [];
-  List<Complaint> filteredComplaintList = [];
-  int layerInd = 0;
-  Complaint? filteredComplaint;
-
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -58,6 +45,19 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Customer? selectedCustomer;
+
+    List<Batch> batchListForCustomer = [];
+    Batch? selectedBatchForCustomer;
+    Map<Bms, List<String>> bmsListForSelectedBatch = {};
+    Bms? selectedBms;
+    List<String> serialNoListforSelectedBms = [];
+    String? selectedBmsSerialNo;
+    List<Complaint> complaintsList = [];
+    List<Complaint> filteredComplaintList = [];
+    int layerInd = 0;
+    Complaint? filteredComplaint;
+
     TextEditingController returnDateController = TextEditingController();
     TextEditingController complaintController = TextEditingController();
     TextEditingController commentController = TextEditingController();
@@ -99,6 +99,8 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
               if (complaintState is SelectedCustomerChangedState) {
                 layerInd = 1; //Into the Batch screen
                 selectedCustomer = complaintState.customer;
+                filteredComplaintList.removeWhere(
+                    (element) => element.customerId != selectedCustomer?.id);
                 infoBloc.add(FetchBatchForCustomerEvent(
                     customerId: complaintState.customer.id));
                 infoBloc.add(FetchComplaintsEvent(
@@ -134,14 +136,16 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                     filteredComplaint = null;
                   } else {
                     filteredComplaint = filteredComplaintList[indComplaint];
-                    commentController.text = filteredComplaint!.comment;
-                    complaintController.text = filteredComplaint!.complaint;
-                    observationController.text = filteredComplaint!.observation;
+                    commentController.text = filteredComplaint?.comment ?? "";
+                    complaintController.text =
+                        filteredComplaint?.complaint ?? "";
+                    observationController.text =
+                        filteredComplaint?.observation ?? "";
                     returnDateController.text =
                         filteredComplaint!.returnDate.toString();
-                    solutionController.text = filteredComplaint!.solution;
+                    solutionController.text = filteredComplaint?.solution ?? "";
                     testingDoneByController.text =
-                        filteredComplaint!.testingDoneBy;
+                        filteredComplaint?.testingDoneBy ?? "";
                   }
                 }
               }
@@ -166,23 +170,26 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                         if (selectedBmsSerialNo != null) {
                                           layerInd = 3;
                                           selectedBmsSerialNo = null;
-                                          filteredComplaintList = List.from(complaintsList
-                                              .where((element) =>
-                                                  element.bmsId ==
-                                                  selectedBms?.id));
+                                          filteredComplaintList = List.from(
+                                              filteredComplaintList.where(
+                                                  (element) =>
+                                                      element.bmsId ==
+                                                      selectedBms?.id));
                                         } else if (selectedBms != null) {
                                           layerInd = 2;
                                           selectedBms = null;
-                                          filteredComplaintList = List.from(complaintsList
-                                              .where((element) =>
-                                                  element.batchId ==
-                                                  selectedBatchForCustomer?.id))
-                                              ;
+                                          filteredComplaintList = List.from(
+                                              filteredComplaintList.where(
+                                                  (element) =>
+                                                      element.batchId ==
+                                                      selectedBatchForCustomer
+                                                          ?.id));
                                         } else if (selectedBatchForCustomer !=
                                             null) {
                                           layerInd = 1;
                                           selectedBatchForCustomer = null;
-                                          filteredComplaintList = List.from(complaintsList);
+                                          filteredComplaintList =
+                                              List.from(complaintsList);
                                         } else {
                                           layerInd = 0;
                                           selectedCustomer = null;
@@ -235,19 +242,30 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                               SubmissionStatus.success) {
                                         complaintsList =
                                             List.from(state.complaintList);
-                                        filteredComplaintList = List.from(complaintsList);
+                                        filteredComplaintList =
+                                            List.from(complaintsList);
                                       } else if (state
                                               is UpdateComplaintStatusState &&
                                           state.status ==
                                               SubmissionStatus.success) {
-                                        int ind = -1;
+                                        int indInComplaintList = -1;
+                                        int indInFilteredComplaintList = -1;
                                         if (filteredComplaint != null) {
-                                          ind = complaintsList
+                                          indInComplaintList = complaintsList
                                               .indexOf(filteredComplaint!);
+                                          indInFilteredComplaintList =
+                                              filteredComplaintList
+                                                  .indexOf(filteredComplaint!);
                                         }
                                         if (state.complaint != null) {
-                                          if (ind != -1) {
-                                            complaintsList[ind] =
+                                          if (indInComplaintList != -1) {
+                                            complaintsList[indInComplaintList] =
+                                                state.complaint!;
+                                          }
+                                          if (indInFilteredComplaintList !=
+                                              -1) {
+                                            filteredComplaintList[
+                                                    indInFilteredComplaintList] =
                                                 state.complaint!;
                                           }
                                           filteredComplaint = state.complaint;
@@ -258,17 +276,20 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                       return layerInd == 1
                                           ? buildBatchListView(
                                               batchListForCustomer,
-                                              filteredComplaintList)
+                                              filteredComplaintList,
+                                              widget.isDashBoard)
                                           : layerInd == 2
                                               ? buildBmsListView(
                                                   bmsListForSelectedBatch
                                                       .entries
                                                       .toList(),
-                                                  filteredComplaintList)
+                                                  filteredComplaintList,
+                                                  widget.isDashBoard)
                                               : layerInd == 3
                                                   ? buildBmsSerialNoListView(
                                                       serialNoListforSelectedBms,
-                                                      filteredComplaintList)
+                                                      filteredComplaintList,
+                                                      widget.isDashBoard)
                                                   : (layerInd == 4) &&
                                                           (filteredComplaint !=
                                                                   null ||

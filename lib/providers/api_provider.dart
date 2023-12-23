@@ -116,7 +116,7 @@ class ApiProvider {
     return complaintList;
   }
 
-  Future updateComplaintStatus(Complaint complaint) async {
+  Future updateComplaintStatus(Map<String, String?> complaint) async {
     return restApiClient.updateComplaintStatus(complaint);
   }
 }

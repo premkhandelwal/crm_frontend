@@ -7,31 +7,31 @@ part 'complaint_request.g.dart';
 @JsonSerializable()
 class Complaint extends Equatable {
   final String id;
-  final String customerId;
-  final String batchId;
-  final String bmsId;
-  final String bmsSerialNo;
-  final DateTime returnDate;
-  final String complaint;
-  final String observation;
-  final String comment;
-  final String solution;
-  final String testingDoneBy;
-  final String status;
+  final String? customerId;
+  final String? batchId;
+  final String? bmsId;
+  final String? bmsSerialNo;
+  final DateTime? returnDate;
+  final String? complaint;
+  final String? observation;
+  final String? comment;
+  final String? solution;
+  final String? testingDoneBy;
+  final String? status;
 
   const Complaint({
     this.id = "",
-    required this.customerId,
-    required this.batchId,
-    required this.bmsId,
-    required this.bmsSerialNo,
-    required this.returnDate,
-    required this.complaint,
-    required this.observation,
-    required this.comment,
-    required this.solution,
-    required this.testingDoneBy,
-    required this.status,
+     this.customerId,
+    this.batchId,
+    this.bmsId,
+    this.bmsSerialNo,
+    this.returnDate,
+    this.complaint,
+    this.observation,
+    this.comment,
+    this.solution,
+    this.testingDoneBy,
+    this.status,
   });
 
   factory Complaint.fromJson(Map<String, dynamic> json) =>

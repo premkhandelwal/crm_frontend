@@ -89,5 +89,5 @@ abstract class RestApiClient {
       @Query("customerId") String customerId);
 
   @PUT(Apis.updateComplaintStatus)
-  Future<Complaint> updateComplaintStatus(@Body() Complaint complaint);
+  Future<Complaint> updateComplaintStatus(@Body() Map<String, String?> complaint);
 }

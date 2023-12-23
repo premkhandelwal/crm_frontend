@@ -43,7 +43,7 @@ class InfoBloc extends Bloc<InfoEvent, InfoState> {
         }
       }
 
-      void updateComplaintStatus(Complaint complaint) async {
+      void updateComplaintStatus(Map<String, String?> complaint) async {
         try {
           emit(UpdateComplaintStatusState(status: SubmissionStatus.inProgress));
           Complaint updatedComplaint =

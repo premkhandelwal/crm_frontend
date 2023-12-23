@@ -81,17 +81,17 @@ Widget buildCustomerWidget(List<Customer> customers, bool isDashboard) {
 }
 
 Widget buildBatchListView(
-    List<Batch> batchListForCustomer, List<Complaint> filteredComplaintList) {
+    List<Batch> batchListForCustomer, List<Complaint> filteredComplaintList, bool isDashboard) {
   return ListView.builder(
     shrinkWrap: true,
     itemCount: batchListForCustomer.length,
     itemBuilder: (context, index) {
       Batch batch = batchListForCustomer[index];
-      filteredComplaintList = filteredComplaintList
+      List<Complaint> filteredComplaintsBatch = filteredComplaintList
           .where((element) => element.batchId == batch.id)
           .toList();
       double percentage =
-          calculatePercentageOfWorkCompleted(filteredComplaintList);
+          calculatePercentageOfWorkCompleted(filteredComplaintsBatch);
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 5.0),
         color: Colors.white,
@@ -118,7 +118,7 @@ Widget buildBatchListView(
                     ],
                   ),
                 ),
-                percentage.isNaN
+                percentage.isNaN || !isDashboard
                     ? Container()
                     : WorkCompletionProgress(percentage: percentage)
               ],
@@ -131,17 +131,16 @@ Widget buildBatchListView(
 }
 
 Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList,
-    List<Complaint> filteredComplaintList) {
+    List<Complaint> filteredComplaintList, bool isDashboard) {
   return ListView.builder(
     shrinkWrap: true,
     itemCount: bmsList.length,
     itemBuilder: (context, index) {
       Bms bms = bmsList[index].key;
-      filteredComplaintList = filteredComplaintList
-          .where((element) => element.bmsId == bms.id)
-          .toList();
+      List<Complaint> filteredComplaintsBMS = List.from(filteredComplaintList
+          .where((element) => element.bmsId == bms.id));
       double percentage =
-          calculatePercentageOfWorkCompleted(filteredComplaintList);
+          calculatePercentageOfWorkCompleted(filteredComplaintsBMS);
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 5.0),
         color: Colors.white,
@@ -170,7 +169,7 @@ Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList,
                     ],
                   ),
                 ),
-                percentage.isNaN
+                percentage.isNaN || !isDashboard
                     ? Container()
                     : WorkCompletionProgress(percentage: percentage)
               ],
@@ -183,7 +182,7 @@ Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList,
 }
 
 Widget buildBmsSerialNoListView(
-    List<String> bmsSerialNoList, List<Complaint> complaintList) {
+    List<String> bmsSerialNoList, List<Complaint> complaintList, bool isDashboard) {
   return ListView.builder(
     shrinkWrap: true,
     itemCount: bmsSerialNoList.length,
@@ -218,10 +217,10 @@ Widget buildBmsSerialNoListView(
                     ],
                   ),
                 ),
-                StatusDisplayWidget(
+                isDashboard ? StatusDisplayWidget(
                     complaintStatus:
                         ind != -1 ? complaintList[index].status : null,
-                    isTappable: false)
+                    isTappable: false): Container()
               ],
             ),
           ),
@@ -269,16 +268,6 @@ class ComplaintForm extends StatelessWidget {
   Widget build(BuildContext context) {
     Complaint complaintData = Complaint(
       id: complaintId ?? "",
-      customerId: selectedCustomer!.id,
-      batchId: selectedBatchForCustomer!.id,
-      bmsId: selectedBms!.id,
-      bmsSerialNo: selectedBmsSerialNo!,
-      returnDate: DateTime.parse(returnDateController.text),
-      complaint: complaintController.text,
-      comment: commentController.text,
-      observation: observationController.text,
-      solution: solutionController.text,
-      testingDoneBy: testingDoneByController.text,
       status: "Not Resolved",
     );
     return Column(
@@ -287,7 +276,7 @@ class ComplaintForm extends StatelessWidget {
         isDashBoard
             ? StatusDisplayWidget(
                 complaintStatus: complaintStatus,
-                complaintData: complaintData,
+                complaintId: complaintId,
                 isTappable: true,
               )
             : Container(),
@@ -355,7 +344,21 @@ class ComplaintForm extends StatelessWidget {
                             if (_formKey.currentState!.validate()) {
                               // Handle form submission
                               // Access the form field values using the controllers
-
+                              Complaint complaintData = Complaint(
+                                id: complaintId ?? "",
+                                customerId: selectedCustomer!.id,
+                                batchId: selectedBatchForCustomer!.id,
+                                bmsId: selectedBms!.id,
+                                bmsSerialNo: selectedBmsSerialNo!,
+                                returnDate:
+                                    DateTime.parse(returnDateController.text),
+                                complaint: complaintController.text,
+                                comment: commentController.text,
+                                observation: observationController.text,
+                                solution: solutionController.text,
+                                testingDoneBy: testingDoneByController.text,
+                                status: "Not Resolved",
+                              );
                               context.read<InfoBloc>().add(
                                   ComplaintSubmitButtonPressed(
                                       complaintData: complaintData));
@@ -375,11 +378,11 @@ class StatusDisplayWidget extends StatelessWidget {
   const StatusDisplayWidget(
       {super.key,
       required this.complaintStatus,
-      this.complaintData,
+      this.complaintId,
       required this.isTappable});
 
   final String? complaintStatus;
-  final Complaint? complaintData;
+  final String? complaintId;
   final bool isTappable;
 
   @override
@@ -390,7 +393,7 @@ class StatusDisplayWidget extends StatelessWidget {
         const SizedBox(
           height: 10,
         ),
-        buildStatusIcon(complaintStatus, context, complaintData, isTappable),
+        buildStatusIcon(complaintStatus, context, complaintId, isTappable),
         const SizedBox(
           height: 20,
         )
@@ -400,7 +403,7 @@ class StatusDisplayWidget extends StatelessWidget {
 }
 
 Widget buildStatusIcon(String? selectedStatus, BuildContext context,
-    Complaint? complaint, bool isTappable) {
+    String? complaintId, bool isTappable) {
   Color? color;
 
   switch (selectedStatus) {
@@ -447,7 +450,7 @@ Widget buildStatusIcon(String? selectedStatus, BuildContext context,
                           selectedStatus = status;
                         },
                         currentStatus: selectedStatus,
-                        complaintData: complaint!),
+                        complaintId: complaintId!),
                   );
                 }
               : null,
@@ -460,13 +463,13 @@ Widget buildStatusIcon(String? selectedStatus, BuildContext context,
 class StatusDialog extends StatefulWidget {
   final Function(String?) onStatusSelected;
   final String? currentStatus;
-  final Complaint complaintData;
+  final String complaintId;
 
   const StatusDialog(
       {Key? key,
       required this.onStatusSelected,
       required this.currentStatus,
-      required this.complaintData})
+      required this.complaintId})
       : super(key: key);
 
   @override
@@ -505,9 +508,10 @@ class _StatusDialogState extends State<StatusDialog> {
       actions: [
         ElevatedButton(
           onPressed: () {
-            context.read<InfoBloc>().add(UpdateComplaintStatusEvent(
-                complaint:
-                    widget.complaintData.copyWith(status: selectedStatus)));
+            context.read<InfoBloc>().add(UpdateComplaintStatusEvent(complaint: {
+                  "id": widget.complaintId,
+                  "status": selectedStatus
+                }));
             Navigator.pop(context); // Close the dialog
             if (selectedStatus != null) {
               widget.onStatusSelected(selectedStatus);
@@ -598,16 +602,15 @@ class WorkCompletionProgress extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("$percentage%"  ),
+        Text("$percentage%"),
         Flexible(
           child: SizedBox(
             width: 60,
-
             child: LinearProgressIndicator(
-            minHeight: 10,
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.black,
-            backgroundColor: Colors.black,
+              minHeight: 10,
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.black,
+              backgroundColor: Colors.black,
               value: percentage / 100,
               valueColor: const AlwaysStoppedAnimation<Color>(
                   Colors.green), // Change color as needed
