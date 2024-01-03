@@ -11,8 +11,8 @@ class BmsValueCubit extends Cubit<BmsValueState> {
     emit(SelectedBmsChangedState(bms: bms, isAdded: isAdded, index: index));
   }
 
-  void selectedBmsTextControllerChanged(Bms bms, bool isAdded, int index) {
-    emit(SelectedBmsTextControllerChangedState(
+  void selectedBmsTextControllerChanged(Bms bms, bool isAdded, int index, DateTime timestamp) {
+    emit(SelectedBmsTextControllerChangedState(timestamp,
         bms: bms, isAdded: isAdded, index: index));
   }
 }

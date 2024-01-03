@@ -11,11 +11,13 @@ final class ComplaintInitial extends ComplaintState {}
 
 final class SelectedCustomerChangedState extends ComplaintState {
   final Customer customer;
+  final bool isDashboard;
 
-  const SelectedCustomerChangedState({required this.customer});
+  const SelectedCustomerChangedState(
+      {required this.customer, required this.isDashboard});
 
   @override
-  List<Object> get props => [customer];
+  List<Object> get props => [customer, isDashboard];
 }
 
 final class SelectedBatchChangedState extends ComplaintState {

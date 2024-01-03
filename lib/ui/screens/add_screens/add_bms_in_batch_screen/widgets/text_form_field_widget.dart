@@ -27,13 +27,13 @@ class TextFormFieldWidget extends StatelessWidget {
           suffixIcon: ind == 0
               ? IconButton(
                   onPressed: () {
-                    bmsValueCubit.selectedBmsTextControllerChanged(bms, true, ind);
+                    bmsValueCubit.selectedBmsTextControllerChanged(bms, true, ind, DateTime.now());
                   },
                   icon: const Icon(Icons.add))
               : IconButton(
                   onPressed: () {
                     bmsValueCubit.selectedBmsTextControllerChanged(
-                        bms, false, ind);
+                        bms, false, ind, DateTime.now());
                   },
                   icon: const Icon(
                     Icons.remove_circle,

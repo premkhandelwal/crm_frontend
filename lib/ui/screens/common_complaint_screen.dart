@@ -167,7 +167,17 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                 children: [
                                   ElevatedButton(
                                       onPressed: () {
+                                        filteredComplaintList =
+                                            List.from(complaintsList);
                                         if (selectedBmsSerialNo != null) {
+                                          if (!widget.isDashBoard) {
+                                            returnDateController.text = "";
+                                            complaintController.text = "";
+                                            commentController.text = "";
+                                            observationController.text = "";
+                                            solutionController.text = "";
+                                            testingDoneByController.text = "";
+                                          }
                                           layerInd = 3;
                                           selectedBmsSerialNo = null;
                                           filteredComplaintList = List.from(

@@ -47,7 +47,7 @@ Widget buildCustomerWidget(List<Customer> customers, bool isDashboard) {
               ? () {
                   context
                       .read<ComplaintCubit>()
-                      .selectedCustomerChanged(customers[index]);
+                      .selectedCustomerChanged(customers[index], isDashboard);
                 }
               : null,
           child: Padding(
@@ -65,7 +65,8 @@ Widget buildCustomerWidget(List<Customer> customers, bool isDashboard) {
                         onPressed: () {
                           context
                               .read<ComplaintCubit>()
-                              .selectedCustomerChanged(customers[index]);
+                              .selectedCustomerChanged(
+                                  customers[index], isDashboard);
                         },
                         icon: const Icon(Icons.visibility),
                         label: const Text("View Details"),
@@ -80,8 +81,8 @@ Widget buildCustomerWidget(List<Customer> customers, bool isDashboard) {
   );
 }
 
-Widget buildBatchListView(
-    List<Batch> batchListForCustomer, List<Complaint> filteredComplaintList, bool isDashboard) {
+Widget buildBatchListView(List<Batch> batchListForCustomer,
+    List<Complaint> filteredComplaintList, bool isDashboard) {
   return ListView.builder(
     shrinkWrap: true,
     itemCount: batchListForCustomer.length,
@@ -137,8 +138,9 @@ Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList,
     itemCount: bmsList.length,
     itemBuilder: (context, index) {
       Bms bms = bmsList[index].key;
-      List<Complaint> filteredComplaintsBMS = List.from(filteredComplaintList
-          .where((element) => element.bmsId == bms.id));
+      List<Complaint> filteredComplaintsBMS = filteredComplaintList
+          .where((element) => element.bmsId == bms.id)
+          .toList();
       double percentage =
           calculatePercentageOfWorkCompleted(filteredComplaintsBMS);
       return Card(
@@ -181,8 +183,8 @@ Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList,
   );
 }
 
-Widget buildBmsSerialNoListView(
-    List<String> bmsSerialNoList, List<Complaint> complaintList, bool isDashboard) {
+Widget buildBmsSerialNoListView(List<String> bmsSerialNoList,
+    List<Complaint> complaintList, bool isDashboard) {
   return ListView.builder(
     shrinkWrap: true,
     itemCount: bmsSerialNoList.length,
@@ -217,10 +219,12 @@ Widget buildBmsSerialNoListView(
                     ],
                   ),
                 ),
-                isDashboard ? StatusDisplayWidget(
-                    complaintStatus:
-                        ind != -1 ? complaintList[index].status : null,
-                    isTappable: false): Container()
+                isDashboard
+                    ? StatusDisplayWidget(
+                        complaintStatus:
+                            ind != -1 ? complaintList[index].status : null,
+                        isTappable: false)
+                    : Container()
               ],
             ),
           ),

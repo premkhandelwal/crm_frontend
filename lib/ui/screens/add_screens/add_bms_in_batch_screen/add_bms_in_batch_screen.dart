@@ -106,6 +106,22 @@ class _AddBmsInBatchScreenState extends State<AddBmsInBatchScreen> {
 
                               setState(() {
                                 selectedBatch = newValue;
+                                if (selectedBatch != null) {
+                                  bmsSrNoControllerMap = selectedBatch!.bmsList
+                                      .map((key, srNoList) {
+                                        
+                                    bmsCheckedList = List.generate(
+                                        bmsList.length, (index) => true);
+                                    List<TextEditingController>
+                                        txtEditingControllerList = srNoList
+                                            .map((srNo) =>
+                                                TextEditingController(
+                                                    text: srNo))
+                                            .toList();
+                                    return MapEntry(
+                                        key, txtEditingControllerList);
+                                  });
+                                }
                               });
                             },
                             labelText: 'Select the Batch',

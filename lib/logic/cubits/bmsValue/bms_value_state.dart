@@ -32,13 +32,14 @@ final class SelectedBmsTextControllerChangedState extends BmsValueState {
   @override
   final Bms bms;
   final int index;
+  final DateTime timestamp;
 
-  const SelectedBmsTextControllerChangedState({
+  const SelectedBmsTextControllerChangedState(this.timestamp, {
     required this.isAdded,
     required this.bms,
     required this.index,
   });
 
   @override
-  List<Object> get props => [isAdded, bms];
+  List<Object> get props => [isAdded, bms, index, timestamp];
 }
