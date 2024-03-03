@@ -599,7 +599,7 @@ class _RestApiClient implements RestApiClient {
     )
             .compose(
               _dio.options,
-              '/addDetails/getBatchForCustomer',
+              '/masters/getBatchForCustomer',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -629,7 +629,7 @@ class _RestApiClient implements RestApiClient {
     )
             .compose(
               _dio.options,
-              '/addDetails/addComplaint',
+              '/complaints/addComplaint',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -657,7 +657,7 @@ class _RestApiClient implements RestApiClient {
     )
             .compose(
               _dio.options,
-              '/addDetails/addBmsInBatch',
+              '/masters/addBmsInBatch',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -667,6 +667,64 @@ class _RestApiClient implements RestApiClient {
               baseUrl,
             ))));
     final value = Batch.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<List<Batch>> fetchVehicleManufacturerforCustomer(
+      String customerId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'customerId': customerId};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result =
+        await _dio.fetch<List<dynamic>>(_setStreamType<List<Batch>>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/getBatchForCustomer',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    var value = _result.data!
+        .map((dynamic i) => Batch.fromJson(i as Map<String, dynamic>))
+        .toList();
+    return value;
+  }
+
+  @override
+  Future<Complaint> addVehicleManufacturer(Complaint complaintRequest) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(complaintRequest.toJson());
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<Complaint>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/complaints/addComplaint',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Complaint.fromJson(_result.data!);
     return value;
   }
 
@@ -684,7 +742,7 @@ class _RestApiClient implements RestApiClient {
     )
             .compose(
               _dio.options,
-              '/addDetails/fetchComplaints',
+              '/complaints/fetchComplaints',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -715,7 +773,7 @@ class _RestApiClient implements RestApiClient {
     )
             .compose(
               _dio.options,
-              '/addDetails/updateComplaintStatus',
+              '/complaints/updateComplaintStatus',
               queryParameters: queryParameters,
               data: _data,
             )

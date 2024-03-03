@@ -99,7 +99,7 @@ class _AppDrawerState extends State<AppDrawer> {
           ),
         ],
       ),
-      ListTile(
+      /*ListTile(
         leading: Icon(Icons.circle, color: Theme.of(context).primaryColor),
         title: const Text("Add BMS in Batch"),
         onTap: () {
@@ -114,7 +114,7 @@ class _AppDrawerState extends State<AppDrawer> {
             isDashBoard: false,
           ));
         },
-      ),
+      ),*/
     ];
   }
 

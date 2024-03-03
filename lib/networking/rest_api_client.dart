@@ -84,6 +84,13 @@ abstract class RestApiClient {
   @POST(Apis.addBmsInBatch)
   Future<Batch> addBmsInBatch(@Body() Batch batchData);
 
+  @GET(Apis.fetchBatchforCustomer)
+  Future<List<Batch>> fetchVehicleManufacturerforCustomer(
+      @Query("customerId") String customerId);
+
+  @POST(Apis.addComplaint)
+  Future<Complaint> addVehicleManufacturer(@Body() Complaint complaintRequest);    
+
   @GET(Apis.fetchComplaint)
   Future<List<Complaint>> fetchComplaints(
       @Query("customerId") String customerId);
