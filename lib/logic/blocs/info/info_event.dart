@@ -21,8 +21,12 @@ class UpdateComplaintStatusEvent extends InfoEvent {
   UpdateComplaintStatusEvent({required this.complaint});
 }
 
-class FetchBatchForCustomerEvent extends InfoEvent {
+
+
+
+class FetchVehicleForCustomerEvent extends InfoEvent {
   final String customerId;
 
-  FetchBatchForCustomerEvent({required this.customerId});
+  FetchVehicleForCustomerEvent({required this.customerId});
 }
+

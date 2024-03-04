@@ -20,6 +20,8 @@ final class SelectedCustomerChangedState extends ComplaintState {
   List<Object> get props => [customer, isDashboard];
 }
 
+
+
 final class SelectedBatchChangedState extends ComplaintState {
   final Batch batch;
 

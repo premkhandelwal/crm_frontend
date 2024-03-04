@@ -1,33 +1,35 @@
 import 'package:crm/enums.dart';
 import 'package:crm/logic/blocs/info/info_bloc.dart';
+import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/complaint/complaint_cubit.dart';
 import 'package:crm/models/batch_request.dart';
-import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/complaint_request.dart';
 import 'package:crm/models/customer_request.dart';
+import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/ui/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 Widget buildUserActionDescription(
     Customer? selectedCustomer,
+    VehicleManufacturer? selectedVehicleManufacturer,
     Batch? selectedBatchForCustomer,
-    Bms? selectedBms,
     String? selectedBmsSerialNo,
     bool isDashBoard) {
   return Center(
     child: Text(
       selectedCustomer == null
           ? "Select the customer:"
-          : selectedBatchForCustomer == null
-              ? "Select the batch:"
-              : selectedBms == null
-                  ? "Select the bms:"
-                  : selectedBmsSerialNo == null
-                      ? "Select the BMS Serial No:"
-                      : isDashBoard
-                          ? 'Complaint Details:'
-                          : "Fill the details:",
+          : selectedVehicleManufacturer == null
+              ? "Select the vehicle manufacturer"
+              : selectedBatchForCustomer == null
+                  ? "Select the batch:"
+                  : 
+                      selectedBmsSerialNo == null
+                          ? "Select the BMS Serial No:"
+                          : isDashBoard
+                              ? 'Complaint Details:'
+                              : "Fill the details:",
       style: const TextStyle(fontWeight: FontWeight.w700),
     ),
   );
@@ -81,6 +83,61 @@ Widget buildCustomerWidget(List<Customer> customers, bool isDashboard) {
   );
 }
 
+Widget buildVehicleManufacturerListView(
+    List<VehicleManufacturer> vehicleManufacturersList,
+    List<Complaint> filteredComplaintList,
+    bool isDashboard) {
+  return ListView.builder(
+    shrinkWrap: true,
+    itemCount: vehicleManufacturersList.length,
+    itemBuilder: (context, index) {
+      VehicleManufacturer vehicleManufacturer = vehicleManufacturersList[index];
+      List<Complaint> filteredComplaintsBatch = filteredComplaintList
+          .where((element) =>
+              element.vehicleManufacturerId == vehicleManufacturer.id)
+          .toList();
+      double percentage =
+          calculatePercentageOfWorkCompleted(filteredComplaintsBatch);
+      return Card(
+        margin: const EdgeInsets.symmetric(vertical: 5.0),
+        color: Colors.white,
+        child: InkWell(
+          onTap: () {
+            context.read<MasterBloc>().add(
+                FetchBatchForVehicleManufacturerEvent(
+                    vehicleManufacturerId: vehicleManufacturer));
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      const Icon(Icons.person),
+                      const SizedBox(width: 10.0),
+                      Text(
+                        vehicleManufacturer.name,
+                        style: const TextStyle(
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                percentage.isNaN || !isDashboard
+                    ? Container()
+                    : WorkCompletionProgress(percentage: percentage)
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
 Widget buildBatchListView(List<Batch> batchListForCustomer,
     List<Complaint> filteredComplaintList, bool isDashboard) {
   return ListView.builder(
@@ -98,6 +155,7 @@ Widget buildBatchListView(List<Batch> batchListForCustomer,
         color: Colors.white,
         child: InkWell(
           onTap: () {
+            
             context.read<ComplaintCubit>().selectedBatchChanged(batch);
           },
           child: Padding(
@@ -131,7 +189,7 @@ Widget buildBatchListView(List<Batch> batchListForCustomer,
   );
 }
 
-Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList,
+/*Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList,
     List<Complaint> filteredComplaintList, bool isDashboard) {
   return ListView.builder(
     shrinkWrap: true,
@@ -181,7 +239,7 @@ Widget buildBmsListView(List<MapEntry<Bms, List<String>>> bmsList,
       );
     },
   );
-}
+}*/
 
 Widget buildBmsSerialNoListView(List<String> bmsSerialNoList,
     List<Complaint> complaintList, bool isDashboard) {
@@ -245,7 +303,6 @@ class ComplaintForm extends StatelessWidget {
       required this.testingDoneByController,
       required this.selectedCustomer,
       required this.selectedBatchForCustomer,
-      required this.selectedBms,
       required GlobalKey<FormState> formKey,
       required this.selectedBmsSerialNo,
       required this.isDashBoard,
@@ -261,7 +318,6 @@ class ComplaintForm extends StatelessWidget {
   final TextEditingController testingDoneByController;
   final Customer? selectedCustomer;
   final Batch? selectedBatchForCustomer;
-  final Bms? selectedBms;
   final GlobalKey<FormState> _formKey;
   final String? selectedBmsSerialNo;
   final bool isDashBoard;
@@ -342,8 +398,7 @@ class ComplaintForm extends StatelessWidget {
                 ? Container()
                 : ElevatedButton(
                     onPressed: selectedCustomer != null &&
-                            selectedBatchForCustomer != null &&
-                            selectedBms != null
+                            selectedBatchForCustomer != null
                         ? () {
                             if (_formKey.currentState!.validate()) {
                               // Handle form submission
@@ -352,7 +407,7 @@ class ComplaintForm extends StatelessWidget {
                                 id: complaintId ?? "",
                                 customerId: selectedCustomer!.id,
                                 batchId: selectedBatchForCustomer!.id,
-                                bmsId: selectedBms!.id,
+                                bmsId: "",
                                 bmsSerialNo: selectedBmsSerialNo!,
                                 returnDate:
                                     DateTime.parse(returnDateController.text),

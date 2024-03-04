@@ -615,66 +615,12 @@ class _RestApiClient implements RestApiClient {
   }
 
   @override
-  Future<Complaint> addComplaint(Complaint complaintRequest) async {
+  Future<List<Batch>> fetchBatchforVehicleManufacturer(
+      String vehicleManufacturerId) async {
     const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(complaintRequest.toJson());
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<Complaint>(Options(
-      method: 'POST',
-      headers: _headers,
-      extra: _extra,
-    )
-            .compose(
-              _dio.options,
-              '/complaints/addComplaint',
-              queryParameters: queryParameters,
-              data: _data,
-            )
-            .copyWith(
-                baseUrl: _combineBaseUrls(
-              _dio.options.baseUrl,
-              baseUrl,
-            ))));
-    final value = Complaint.fromJson(_result.data!);
-    return value;
-  }
-
-  @override
-  Future<Batch> addBmsInBatch(Batch batchData) async {
-    const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(batchData.toJson());
-    final _result =
-        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Batch>(Options(
-      method: 'POST',
-      headers: _headers,
-      extra: _extra,
-    )
-            .compose(
-              _dio.options,
-              '/masters/addBmsInBatch',
-              queryParameters: queryParameters,
-              data: _data,
-            )
-            .copyWith(
-                baseUrl: _combineBaseUrls(
-              _dio.options.baseUrl,
-              baseUrl,
-            ))));
-    final value = Batch.fromJson(_result.data!);
-    return value;
-  }
-
-  @override
-  Future<List<Batch>> fetchVehicleManufacturerforCustomer(
-      String customerId) async {
-    const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'customerId': customerId};
+    final queryParameters = <String, dynamic>{
+      r'vehicleManufacturerId': vehicleManufacturerId
+    };
     final _headers = <String, dynamic>{};
     final Map<String, dynamic>? _data = null;
     final _result =
@@ -685,7 +631,7 @@ class _RestApiClient implements RestApiClient {
     )
             .compose(
               _dio.options,
-              '/masters/getBatchForCustomer',
+              '/masters/getBatchForVehicleManufacturer',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -701,7 +647,35 @@ class _RestApiClient implements RestApiClient {
   }
 
   @override
-  Future<Complaint> addVehicleManufacturer(Complaint complaintRequest) async {
+  Future<Batch> addBmsSrNoInBatch(Batch batchData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(batchData.toJson());
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Batch>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/addBmsSrNoInBatch',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = Batch.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<Complaint> addComplaint(Complaint complaintRequest) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -783,6 +757,66 @@ class _RestApiClient implements RestApiClient {
               baseUrl,
             ))));
     final value = Complaint.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<VehicleManufacturer> addVehicleManufacturer(
+      VehicleManufacturer vehicleManufacturer) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(vehicleManufacturer.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<VehicleManufacturer>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/addVehicleManufacturer',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = VehicleManufacturer.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<List<VehicleManufacturer>> fetchVehicleManufacturerforCustomer(
+      String customerId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'customerId': customerId};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<List<dynamic>>(_setStreamType<List<VehicleManufacturer>>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/getVehicleManufacturer',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    var value = _result.data!
+        .map((dynamic i) =>
+            VehicleManufacturer.fromJson(i as Map<String, dynamic>))
+        .toList();
     return value;
   }
 

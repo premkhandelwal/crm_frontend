@@ -24,10 +24,14 @@ final class UpdateComplaintStatusState extends InfoState {
   UpdateComplaintStatusState({required this.status, this.complaint});
 }
 
-final class FetchBatchForCustomerState extends InfoState {
-  final SubmissionStatus submissionStatus;
-  final List<Batch> batchList;
 
-  FetchBatchForCustomerState(
-      {required this.submissionStatus, this.batchList = const []});
+
+
+
+final class FetchVehicleForCustomerState extends InfoState {
+  final SubmissionStatus submissionStatus;
+  final List<VehicleManufacturer> vehicleManufacturerList;
+
+  FetchVehicleForCustomerState(
+      {required this.submissionStatus, this.vehicleManufacturerList = const []});
 }

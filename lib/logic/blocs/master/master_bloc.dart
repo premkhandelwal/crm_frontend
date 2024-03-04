@@ -5,6 +5,7 @@ import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/customer_request.dart';
 import 'package:crm/models/harness_request.dart';
 import 'package:crm/models/make_request.dart';
+import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/providers/api_provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
@@ -240,16 +241,40 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
         }
       }
 
-      void addBmsInBatch(Batch batch) async {
+      
+      void fetchBatchForVehicleManufacturer(
+          VehicleManufacturer vehicleManufacturer) async {
         try {
-          emit(AddBmsInBatchState(
+          emit(FetchBatchForVehicleManufacturerState(
               submissionStatus: SubmissionStatus.inProgress));
-          await apiProvider.addBmsInBatch(batch);
-          emit(AddBmsInBatchState(submissionStatus: SubmissionStatus.success));
+          List<Batch> batchList = await apiProvider
+              .fetchBatchforVehicleManufacturer(vehicleManufacturer.id);
+          emit(FetchBatchForVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.success,
+              vehicleManufacturer: vehicleManufacturer,
+              batchList: batchList));
         } catch (e) {
-          emit(AddBmsInBatchState(submissionStatus: SubmissionStatus.failure));
+          emit(FetchBatchForVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.failure));
         }
       }
+
+      void fetchBatchForCustomer(String customerId) async {
+        try {
+          emit(FetchBatchForCustomerState(
+              submissionStatus: SubmissionStatus.inProgress));
+          List<Batch> batchList =
+              await apiProvider.fetchBatchforCustomer(customerId);
+          emit(FetchBatchForCustomerState(
+              submissionStatus: SubmissionStatus.success,
+              batchList: batchList));
+        } catch (e) {
+          emit(FetchBatchForCustomerState(
+              submissionStatus: SubmissionStatus.failure));
+        }
+      }
+
+
 
       switch (event.runtimeType) {
         case AddCustomerEvent:
@@ -307,9 +332,13 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
           return deleteBatch(event.batchData);
         case FetchBatchEvent:
           return fetchAllBatch();
-        case AddBmsInBatchEvent:
-          event as AddBmsInBatchEvent;
-          return addBmsInBatch(event.batchData);
+        case FetchBatchForCustomerEvent:
+          event as FetchBatchForCustomerEvent;
+          return fetchBatchForCustomer(event.customerId);  
+
+        case FetchBatchForVehicleManufacturerEvent:
+          event as FetchBatchForVehicleManufacturerEvent;
+          return fetchBatchForVehicleManufacturer(event.vehicleManufacturerId);
         default:
       }
     });

@@ -1,5 +1,4 @@
 import 'package:crm/enums.dart';
-import 'package:crm/logic/blocs/info/info_bloc.dart';
 import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/batch_request.dart';
@@ -54,7 +53,7 @@ class _ViewBatchScreenState extends State<ViewBatchScreen> {
           }
         },
         builder: (context, state) {
-          return BlocConsumer<InfoBloc, InfoState>(
+          return BlocConsumer<MasterBloc, MasterState>(
             listener: (context, state) {
               if (state is FetchBatchForCustomerState &&
                   state.submissionStatus == SubmissionStatus.success) {
@@ -69,7 +68,7 @@ class _ViewBatchScreenState extends State<ViewBatchScreen> {
                     value: selectedCustomer,
                     onChanged: (newValue) {
                       if (newValue != null) {
-                        context.read<InfoBloc>().add(
+                        context.read<MasterBloc>().add(
                             FetchBatchForCustomerEvent(
                                 customerId: newValue.id));
                       }

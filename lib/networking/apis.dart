@@ -25,8 +25,13 @@ class Apis {
   static const String editBatch = "/masters/editBatch";
   static const String deleteBatch = "/masters/deleteBatch";
   static const String fetchBatch = "/masters/getAllBatch";
-  static const String addBmsInBatch = "/masters/addBmsInBatch";
+  
+  static const String addBmsSrNoInBatch = "/masters/addBmsSrNoInBatch";
+  static const String fetchBmsSrNoBatch = "/masters/fetchBmsSrNoBatch";
+  
+
   static const String fetchBatchforCustomer = "/masters/getBatchForCustomer";
+  static const String fetchBatchforVehicleManufacturer = "/masters/getBatchForVehicleManufacturer";
 
   static const String addMake = "/masters/addMake";
   static const String editMake = "/masters/editMake";
@@ -35,7 +40,7 @@ class Apis {
 
   static const String addVehicleManufacturer =
       "/masters/addVehicleManufacturer";
-  static const String getVehicleManufacturer =
+  static const String fetchVehicleManufacturer =
       "/masters/getVehicleManufacturer";
 
   static const String addComplaint = "/complaints/addComplaint";

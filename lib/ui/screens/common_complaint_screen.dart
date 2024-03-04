@@ -7,6 +7,7 @@ import 'package:crm/models/batch_request.dart';
 import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/complaint_request.dart';
 import 'package:crm/models/customer_request.dart';
+import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/ui/screens/common_complaint_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,15 +48,15 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
   Widget build(BuildContext context) {
     Customer? selectedCustomer;
 
+    List<VehicleManufacturer> vehicleManufacturerListForCustomer = [];
+    VehicleManufacturer? selectedVehicleManufacturer;
     List<Batch> batchListForCustomer = [];
     Batch? selectedBatchForCustomer;
-    Map<Bms, List<String>> bmsListForSelectedBatch = {};
-    Bms? selectedBms;
     List<String> serialNoListforSelectedBms = [];
     String? selectedBmsSerialNo;
     List<Complaint> complaintsList = [];
     List<Complaint> filteredComplaintList = [];
-    int layerInd = 0;
+    int layerInd = 0; //Home Page
     Complaint? filteredComplaint;
 
     TextEditingController returnDateController = TextEditingController();
@@ -77,6 +78,14 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
           } else if (customerState is FetchBmsState &&
               customerState.submissionStatus == SubmissionStatus.success) {
             bmsList = List.from(customerState.bmsList);
+          } else if (customerState is FetchBatchForVehicleManufacturerState &&
+              customerState.submissionStatus == SubmissionStatus.success) {
+            layerInd = 2; //Into the batch screen
+            selectedVehicleManufacturer = customerState.vehicleManufacturer;
+            filteredComplaintList.removeWhere((element) =>
+                element.vehicleManufacturerId !=
+                selectedVehicleManufacturer?.id);
+            batchListForCustomer = customerState.batchList;
           }
         },
         builder: (context, customerState) {
@@ -97,34 +106,23 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
           return BlocConsumer<ComplaintCubit, ComplaintState>(
             listener: (context, complaintState) {
               if (complaintState is SelectedCustomerChangedState) {
-                layerInd = 1; //Into the Batch screen
+                layerInd = 1; //Into the Vehicle Manufacturer screen
                 selectedCustomer = complaintState.customer;
                 filteredComplaintList.removeWhere(
                     (element) => element.customerId != selectedCustomer?.id);
-                infoBloc.add(FetchBatchForCustomerEvent(
+                infoBloc.add(FetchVehicleForCustomerEvent(
                     customerId: complaintState.customer.id));
                 infoBloc.add(FetchComplaintsEvent(
                     customerId: complaintState.customer.id));
               } else if (complaintState is SelectedBatchChangedState) {
-                layerInd = 2; //Into the Bms screen
+                layerInd = 3; //Into the Bms sr no screen
 
                 selectedBatchForCustomer = complaintState.batch;
                 filteredComplaintList.removeWhere((element) =>
                     element.batchId != selectedBatchForCustomer?.id);
 
-                bmsListForSelectedBatch = {};
-                bmsListForSelectedBatch =
-                    complaintState.batch.bmsList.map((key, value) {
-                  Bms bms = bmsList.firstWhere((element) => element.id == key);
-                  return MapEntry(bms, value);
-                });
-              } else if (complaintState is SelectedBmsChangedState) {
-                layerInd = 3; //Into the Serial No screen
-                selectedBms = complaintState.bms;
-                filteredComplaintList
-                    .removeWhere((element) => element.bmsId != selectedBms?.id);
-
-                serialNoListforSelectedBms = complaintState.serialNoList;
+                serialNoListforSelectedBms =
+                    selectedBatchForCustomer?.bmsSrNoList ?? [];
               } else if (complaintState is SelectedSerialNoChangedState) {
                 layerInd = 4; //Into the Complaint screen
                 selectedBmsSerialNo = complaintState.serialNo;
@@ -183,21 +181,23 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                           filteredComplaintList = List.from(
                                               filteredComplaintList.where(
                                                   (element) =>
-                                                      element.bmsId ==
-                                                      selectedBms?.id));
-                                        } else if (selectedBms != null) {
-                                          layerInd = 2;
-                                          selectedBms = null;
-                                          filteredComplaintList = List.from(
-                                              filteredComplaintList.where(
-                                                  (element) =>
                                                       element.batchId ==
                                                       selectedBatchForCustomer
                                                           ?.id));
                                         } else if (selectedBatchForCustomer !=
                                             null) {
-                                          layerInd = 1;
+                                          layerInd = 2;
                                           selectedBatchForCustomer = null;
+                                          filteredComplaintList = List.from(
+                                              filteredComplaintList.where(
+                                                  (element) =>
+                                                      element.vehicleManufacturerId ==
+                                                      selectedVehicleManufacturer
+                                                          ?.id));
+                                        } else if (selectedVehicleManufacturer !=
+                                            null) {
+                                          layerInd = 1;
+                                          selectedVehicleManufacturer = null;
                                           filteredComplaintList =
                                               List.from(complaintsList);
                                         } else {
@@ -224,8 +224,8 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                             ? Container()
                             : buildUserActionDescription(
                                 selectedCustomer,
+                                selectedVehicleManufacturer,
                                 selectedBatchForCustomer,
-                                selectedBms,
                                 selectedBmsSerialNo,
                                 widget.isDashBoard),
                         const SizedBox(
@@ -242,11 +242,13 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                     customers, widget.isDashBoard)
                                 : BlocConsumer<InfoBloc, InfoState>(
                                     listener: (context, state) {
-                                      if (state is FetchBatchForCustomerState &&
+                                      if (state
+                                              is FetchVehicleForCustomerState &&
                                           state.submissionStatus ==
                                               SubmissionStatus.success) {
-                                        batchListForCustomer =
-                                            List.from(state.batchList);
+                                        vehicleManufacturerListForCustomer =
+                                            List.from(
+                                                state.vehicleManufacturerList);
                                       } else if (state is ComplaintFetchState &&
                                           state.submissionStatus ==
                                               SubmissionStatus.success) {
@@ -284,15 +286,13 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                     },
                                     builder: (context, state) {
                                       return layerInd == 1
-                                          ? buildBatchListView(
-                                              batchListForCustomer,
+                                          ? buildVehicleManufacturerListView(
+                                              vehicleManufacturerListForCustomer,
                                               filteredComplaintList,
                                               widget.isDashBoard)
                                           : layerInd == 2
-                                              ? buildBmsListView(
-                                                  bmsListForSelectedBatch
-                                                      .entries
-                                                      .toList(),
+                                              ? buildBatchListView(
+                                                  batchListForCustomer,
                                                   filteredComplaintList,
                                                   widget.isDashBoard)
                                               : layerInd == 3
@@ -322,8 +322,6 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                                               selectedCustomer,
                                                           selectedBatchForCustomer:
                                                               selectedBatchForCustomer,
-                                                          selectedBms:
-                                                              selectedBms,
                                                           formKey: _formKey,
                                                           selectedBmsSerialNo:
                                                               selectedBmsSerialNo,

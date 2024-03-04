@@ -10,16 +10,17 @@ class ComplaintCubit extends Cubit<ComplaintState> {
   ComplaintCubit() : super(ComplaintInitial());
 
   void selectedCustomerChanged(Customer customer, bool isDashboard) {
-    emit(SelectedCustomerChangedState(customer: customer, isDashboard: isDashboard));
+    emit(SelectedCustomerChangedState(
+        customer: customer, isDashboard: isDashboard));
   }
+
+
 
   void selectedBatchChanged(Batch batch) {
     emit(SelectedBatchChangedState(batch: batch));
   }
 
-  void selectedBmsChanged(Bms bms, List<String> serialNoList) {
-    emit(SelectedBmsChangedState(bms: bms, serialNoList: serialNoList));
-  }
+
 
   void selectedSerialNoChanged(String serialNo) {
     emit(SelectedSerialNoChangedState(serialNo: serialNo));

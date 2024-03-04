@@ -1,6 +1,6 @@
 import 'package:crm/enums.dart';
-import 'package:crm/models/batch_request.dart';
 import 'package:crm/models/complaint_request.dart';
+import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/providers/api_provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,17 +28,19 @@ class InfoBloc extends Bloc<InfoEvent, InfoState> {
             complaintList: complaintList));
       }
 
-      void fetchBatchForCustomer(String customerId) async {
+      
+      
+      void fetchVehicleForCustomer(String customerId) async {
         try {
-          emit(FetchBatchForCustomerState(
+          emit(FetchVehicleForCustomerState(
               submissionStatus: SubmissionStatus.inProgress));
-          List<Batch> batchList =
-              await apiProvider.fetchBatchforCustomer(customerId);
-          emit(FetchBatchForCustomerState(
+          List<VehicleManufacturer> vehicleManufacturerList =
+              await apiProvider.fetchVehicleManufacturerforCustomer(customerId);
+          emit(FetchVehicleForCustomerState(
               submissionStatus: SubmissionStatus.success,
-              batchList: batchList));
+              vehicleManufacturerList: vehicleManufacturerList));
         } catch (e) {
-          emit(FetchBatchForCustomerState(
+          emit(FetchVehicleForCustomerState(
               submissionStatus: SubmissionStatus.failure));
         }
       }
@@ -62,9 +64,11 @@ class InfoBloc extends Bloc<InfoEvent, InfoState> {
         case FetchComplaintsEvent:
           event as FetchComplaintsEvent;
           return fetchComplaints(event.customerId);
-        case FetchBatchForCustomerEvent:
-          event as FetchBatchForCustomerEvent;
-          return fetchBatchForCustomer(event.customerId);
+        
+       
+        case FetchVehicleForCustomerEvent:
+          event as FetchVehicleForCustomerEvent;
+          return fetchVehicleForCustomer(event.customerId);
         case UpdateComplaintStatusEvent:
           event as UpdateComplaintStatusEvent;
           return updateComplaintStatus(event.complaint);

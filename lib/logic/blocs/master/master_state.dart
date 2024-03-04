@@ -161,3 +161,24 @@ final class AddBmsInBatchState extends MasterState {
 
   AddBmsInBatchState({required this.submissionStatus});
 }
+
+final class FetchBatchForVehicleManufacturerState extends MasterState {
+  @override
+  final SubmissionStatus submissionStatus;
+  final List<Batch> batchList;
+  final VehicleManufacturer? vehicleManufacturer;
+
+  FetchBatchForVehicleManufacturerState(
+      {required this.submissionStatus,
+      this.vehicleManufacturer,
+      this.batchList = const []});
+}
+
+final class FetchBatchForCustomerState extends MasterState {
+  @override
+  final SubmissionStatus submissionStatus;
+  final List<Batch> batchList;
+
+  FetchBatchForCustomerState(
+      {required this.submissionStatus, this.batchList = const []});
+}

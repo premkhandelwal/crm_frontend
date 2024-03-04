@@ -15,6 +15,10 @@ class VehicleManufacturer extends Equatable {
     required this.customerId,
   });
 
+  factory VehicleManufacturer.fromJson(Map<String, dynamic> json) => _$VehicleManufacturerFromJson(json);
+
+  Map<String, dynamic> toJson() => _$VehicleManufacturerToJson(this);
+
   @override
   List<Object?> get props => [id, name, customerId];
 }

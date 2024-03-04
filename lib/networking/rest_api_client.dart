@@ -4,6 +4,7 @@ import 'package:crm/models/complaint_request.dart';
 import 'package:crm/models/customer_request.dart';
 import 'package:crm/models/harness_request.dart';
 import 'package:crm/models/make_request.dart';
+import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/networking/apis.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
@@ -78,18 +79,16 @@ abstract class RestApiClient {
   Future<List<Batch>> fetchBatchforCustomer(
       @Query("customerId") String customerId);
 
+  @GET(Apis.fetchBatchforVehicleManufacturer)
+  Future<List<Batch>> fetchBatchforVehicleManufacturer(
+      @Query("vehicleManufacturerId") String vehicleManufacturerId);
+
+  @POST(Apis.addBmsSrNoInBatch)
+  Future<Batch> addBmsSrNoInBatch(@Body() Batch batchData);
+
+  
   @POST(Apis.addComplaint)
-  Future<Complaint> addComplaint(@Body() Complaint complaintRequest);
-
-  @POST(Apis.addBmsInBatch)
-  Future<Batch> addBmsInBatch(@Body() Batch batchData);
-
-  @GET(Apis.fetchBatchforCustomer)
-  Future<List<Batch>> fetchVehicleManufacturerforCustomer(
-      @Query("customerId") String customerId);
-
-  @POST(Apis.addComplaint)
-  Future<Complaint> addVehicleManufacturer(@Body() Complaint complaintRequest);    
+  Future<Complaint> addComplaint(@Body() Complaint complaintRequest);    
 
   @GET(Apis.fetchComplaint)
   Future<List<Complaint>> fetchComplaints(
@@ -97,4 +96,13 @@ abstract class RestApiClient {
 
   @PUT(Apis.updateComplaintStatus)
   Future<Complaint> updateComplaintStatus(@Body() Map<String, String?> complaint);
+  
+  @POST(Apis.addVehicleManufacturer)
+  Future<VehicleManufacturer> addVehicleManufacturer(@Body() VehicleManufacturer vehicleManufacturer);
+
+  @GET(Apis.fetchVehicleManufacturer)
+  Future<List<VehicleManufacturer>> fetchVehicleManufacturerforCustomer(
+      @Query("customerId") String customerId);
+
+
 }

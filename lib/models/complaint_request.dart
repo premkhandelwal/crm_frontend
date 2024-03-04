@@ -10,6 +10,7 @@ class Complaint extends Equatable {
   final String? customerId;
   final String? batchId;
   final String? bmsId;
+  final String? vehicleManufacturerId;
   final String? bmsSerialNo;
   final DateTime? returnDate;
   final String? complaint;
@@ -21,9 +22,10 @@ class Complaint extends Equatable {
 
   const Complaint({
     this.id = "",
-     this.customerId,
+    this.customerId,
     this.batchId,
     this.bmsId,
+    this.vehicleManufacturerId,
     this.bmsSerialNo,
     this.returnDate,
     this.complaint,

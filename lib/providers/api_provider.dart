@@ -4,6 +4,7 @@ import 'package:crm/models/complaint_request.dart';
 import 'package:crm/models/customer_request.dart';
 import 'package:crm/models/harness_request.dart';
 import 'package:crm/models/make_request.dart';
+import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/networking/dio_builder.dart';
 import 'package:crm/networking/rest_api_client.dart';
 
@@ -102,12 +103,26 @@ class ApiProvider {
     return batchList;
   }
 
+  Future<List<Batch>> fetchBatchforVehicleManufacturer(String vehicleManufacturerId) async {
+    List<Batch> batchList =
+        await restApiClient.fetchBatchforVehicleManufacturer(vehicleManufacturerId);
+    return batchList;
+  }
+
+  Future<List<VehicleManufacturer>> fetchVehicleManufacturerforCustomer(String customerId) async {
+    List<VehicleManufacturer> vehicleManufacturerList =
+        await restApiClient.fetchVehicleManufacturerforCustomer(customerId);
+    return vehicleManufacturerList;
+  }
+
+  
+
   Future addComplaint(Complaint complaint) async {
     return restApiClient.addComplaint(complaint);
   }
 
-  Future addBmsInBatch(Batch batch) async {
-    return restApiClient.addBmsInBatch(batch);
+  Future addBmsSrNoInBatch(Batch batch) async {
+    return restApiClient.addBmsSrNoInBatch(batch);
   }
 
   Future<List<Complaint>> fetchComplaints(String customerId) async {
