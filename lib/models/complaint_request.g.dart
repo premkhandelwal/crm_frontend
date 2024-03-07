@@ -12,6 +12,8 @@ Complaint _$ComplaintFromJson(Map<String, dynamic> json) => Complaint(
       batchId: json['batchId'] as String?,
       bmsId: json['bmsId'] as String?,
       vehicleManufacturerId: json['vehicleManufacturerId'] as String?,
+      makeId: json['makeId'] as String?,
+      harnessId: json['harnessId'] as String?,
       bmsSerialNo: json['bmsSerialNo'] as String?,
       returnDate: json['returnDate'] == null
           ? null
@@ -29,6 +31,8 @@ Map<String, dynamic> _$ComplaintToJson(Complaint instance) => <String, dynamic>{
       'customerId': instance.customerId,
       'batchId': instance.batchId,
       'bmsId': instance.bmsId,
+      'makeId': instance.makeId,
+      'harnessId': instance.harnessId,
       'vehicleManufacturerId': instance.vehicleManufacturerId,
       'bmsSerialNo': instance.bmsSerialNo,
       'returnDate': instance.returnDate?.toIso8601String(),

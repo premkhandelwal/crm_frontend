@@ -9,9 +9,9 @@ part 'complaint_state.dart';
 class ComplaintCubit extends Cubit<ComplaintState> {
   ComplaintCubit() : super(ComplaintInitial());
 
-  void selectedCustomerChanged(Customer customer, bool isDashboard) {
+  void selectedCustomerChanged(Customer customer) {
     emit(SelectedCustomerChangedState(
-        customer: customer, isDashboard: isDashboard));
+        customer: customer));
   }
 
 

@@ -241,7 +241,6 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
         }
       }
 
-      
       void fetchBatchForVehicleManufacturer(
           VehicleManufacturer vehicleManufacturer) async {
         try {
@@ -274,7 +273,18 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
         }
       }
 
-
+      void addBmsSrNoInBatch(Batch batch) async {
+        try {
+          emit(AddBmsSrNoInBatchState(
+              submissionStatus: SubmissionStatus.inProgress));
+          await apiProvider.addBmsSrNoInBatch(batch);
+          emit(AddBmsSrNoInBatchState(
+              submissionStatus: SubmissionStatus.success));
+        } catch (e) {
+          emit(AddBmsSrNoInBatchState(
+              submissionStatus: SubmissionStatus.failure));
+        }
+      }
 
       switch (event.runtimeType) {
         case AddCustomerEvent:
@@ -334,11 +344,13 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
           return fetchAllBatch();
         case FetchBatchForCustomerEvent:
           event as FetchBatchForCustomerEvent;
-          return fetchBatchForCustomer(event.customerId);  
-
+          return fetchBatchForCustomer(event.customerId);
         case FetchBatchForVehicleManufacturerEvent:
           event as FetchBatchForVehicleManufacturerEvent;
           return fetchBatchForVehicleManufacturer(event.vehicleManufacturerId);
+        case AddBmsSrNoInBatchEvent:
+          event as AddBmsSrNoInBatchEvent;
+          return addBmsSrNoInBatch(event.batch);
         default:
       }
     });

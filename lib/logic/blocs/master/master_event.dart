@@ -103,17 +103,20 @@ final class DeleteBatchEvent extends MasterEvent {
 
 final class FetchBatchEvent extends MasterEvent {}
 
-
 class FetchBatchForVehicleManufacturerEvent extends MasterEvent {
   final VehicleManufacturer vehicleManufacturerId;
 
   FetchBatchForVehicleManufacturerEvent({required this.vehicleManufacturerId});
 }
 
-
-
 class FetchBatchForCustomerEvent extends MasterEvent {
   final String customerId;
 
   FetchBatchForCustomerEvent({required this.customerId});
+}
+
+class AddBmsSrNoInBatchEvent extends MasterEvent {
+  final Batch batch;
+
+  AddBmsSrNoInBatchEvent({required this.batch});
 }

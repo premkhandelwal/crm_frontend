@@ -13,13 +13,12 @@ class Batch extends Equatable {
   final String customerId;
   final String vehicleManufacturerId;
 
-  const Batch({
-    this.id = "",
-    this.bmsSrNoList = const [],
-    required this.batchName,
-    required this.customerId,
-    this.vehicleManufacturerId = ""
-  });
+  const Batch(
+      {this.id = "",
+      this.bmsSrNoList = const [],
+      required this.batchName,
+      required this.customerId,
+      this.vehicleManufacturerId = ""});
 
   factory Batch.fromJson(Map<String, dynamic> json) => _$BatchFromJson(json);
 
@@ -31,17 +30,22 @@ class Batch extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, batchName, customerId, bmsSrNoList, vehicleManufacturerId];
+  List<Object?> get props =>
+      [id, batchName, customerId, bmsSrNoList, vehicleManufacturerId];
 
   Batch copyWith({
     String? id,
+    List<String>? bmsSrNoList,
     String? batchName,
     String? customerId,
+    String? vehicleManufacturerId,
   }) {
     return Batch(
-      id: id ?? this.id,
-      batchName: batchName ?? this.batchName,
-      customerId: customerId ?? this.customerId,
-    );
+        id: id ?? this.id,
+        bmsSrNoList: bmsSrNoList ?? this.bmsSrNoList,
+        batchName: batchName ?? this.batchName,
+        customerId: customerId ?? this.customerId,
+        vehicleManufacturerId:
+            vehicleManufacturerId ?? this.vehicleManufacturerId);
   }
 }

@@ -46,9 +46,7 @@ class _AppDrawerState extends State<AppDrawer> {
         leading: Icon(Icons.dashboard, color: Theme.of(context).primaryColor),
         title: const Text("Dashboard"),
         onTap: () {
-          appCubit.appPageChaged(const CommonComplaintScreen(
-            isDashBoard: true,
-          ));
+          appCubit.appPageChaged(const CommonComplaintScreen());
         },
       ),
       ExpansionTile(

@@ -9,7 +9,6 @@ class NavRoutes {
 
 final Map<String, WidgetBuilder> routesMap = {
   NavRoutes.addComplaintScreen: (context) => const CommonComplaintScreen(
-        isDashBoard: false,
       ),
   NavRoutes.homeScreen: (context) => const HomeScreen(),
 };

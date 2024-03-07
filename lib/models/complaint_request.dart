@@ -10,6 +10,8 @@ class Complaint extends Equatable {
   final String? customerId;
   final String? batchId;
   final String? bmsId;
+  final String? makeId;
+  final String? harnessId;
   final String? vehicleManufacturerId;
   final String? bmsSerialNo;
   final DateTime? returnDate;
@@ -26,6 +28,8 @@ class Complaint extends Equatable {
     this.batchId,
     this.bmsId,
     this.vehicleManufacturerId,
+    this.makeId,
+    this.harnessId,
     this.bmsSerialNo,
     this.returnDate,
     this.complaint,

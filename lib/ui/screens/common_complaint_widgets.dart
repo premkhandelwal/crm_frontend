@@ -3,8 +3,11 @@ import 'package:crm/logic/blocs/info/info_bloc.dart';
 import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/complaint/complaint_cubit.dart';
 import 'package:crm/models/batch_request.dart';
+import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/complaint_request.dart';
 import 'package:crm/models/customer_request.dart';
+import 'package:crm/models/harness_request.dart';
+import 'package:crm/models/make_request.dart';
 import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/ui/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +17,7 @@ Widget buildUserActionDescription(
     Customer? selectedCustomer,
     VehicleManufacturer? selectedVehicleManufacturer,
     Batch? selectedBatchForCustomer,
-    String? selectedBmsSerialNo,
-    bool isDashBoard) {
+    String? selectedBmsSerialNo) {
   return Center(
     child: Text(
       selectedCustomer == null
@@ -24,18 +26,15 @@ Widget buildUserActionDescription(
               ? "Select the vehicle manufacturer"
               : selectedBatchForCustomer == null
                   ? "Select the batch:"
-                  : 
-                      selectedBmsSerialNo == null
-                          ? "Select the BMS Serial No:"
-                          : isDashBoard
-                              ? 'Complaint Details:'
-                              : "Fill the details:",
+                  : selectedBmsSerialNo == null
+                      ? "Select the BMS Serial No:"
+                      : 'Complaint Details:',
       style: const TextStyle(fontWeight: FontWeight.w700),
     ),
   );
 }
 
-Widget buildCustomerWidget(List<Customer> customers, bool isDashboard) {
+Widget buildCustomerWidget(List<Customer> customers) {
   return ListView.builder(
     shrinkWrap: true,
     // Your existing builder code...
@@ -43,15 +42,13 @@ Widget buildCustomerWidget(List<Customer> customers, bool isDashboard) {
     itemBuilder: (context, index) {
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 5.0),
-        color: isDashboard ? null : Colors.white,
+        color: Colors.white,
         child: InkWell(
-          onTap: !isDashboard
-              ? () {
-                  context
-                      .read<ComplaintCubit>()
-                      .selectedCustomerChanged(customers[index], isDashboard);
-                }
-              : null,
+          onTap: () {
+            context
+                .read<ComplaintCubit>()
+                .selectedCustomerChanged(customers[index]);
+          },
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -62,18 +59,15 @@ Widget buildCustomerWidget(List<Customer> customers, bool isDashboard) {
                   customers[index].name,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                isDashboard
-                    ? ElevatedButton.icon(
-                        onPressed: () {
-                          context
-                              .read<ComplaintCubit>()
-                              .selectedCustomerChanged(
-                                  customers[index], isDashboard);
-                        },
-                        icon: const Icon(Icons.visibility),
-                        label: const Text("View Details"),
-                      )
-                    : Container(),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    context.read<ComplaintCubit>().selectedCustomerChanged(
+                          customers[index],
+                        );
+                  },
+                  icon: const Icon(Icons.visibility),
+                  label: const Text("View Details"),
+                ),
               ],
             ),
           ),
@@ -85,8 +79,7 @@ Widget buildCustomerWidget(List<Customer> customers, bool isDashboard) {
 
 Widget buildVehicleManufacturerListView(
     List<VehicleManufacturer> vehicleManufacturersList,
-    List<Complaint> filteredComplaintList,
-    bool isDashboard) {
+    List<Complaint> filteredComplaintList) {
   return ListView.builder(
     shrinkWrap: true,
     itemCount: vehicleManufacturersList.length,
@@ -126,7 +119,7 @@ Widget buildVehicleManufacturerListView(
                     ],
                   ),
                 ),
-                percentage.isNaN || !isDashboard
+                percentage.isNaN
                     ? Container()
                     : WorkCompletionProgress(percentage: percentage)
               ],
@@ -138,8 +131,8 @@ Widget buildVehicleManufacturerListView(
   );
 }
 
-Widget buildBatchListView(List<Batch> batchListForCustomer,
-    List<Complaint> filteredComplaintList, bool isDashboard) {
+Widget buildBatchListView(
+    List<Batch> batchListForCustomer, List<Complaint> filteredComplaintList) {
   return ListView.builder(
     shrinkWrap: true,
     itemCount: batchListForCustomer.length,
@@ -155,7 +148,6 @@ Widget buildBatchListView(List<Batch> batchListForCustomer,
         color: Colors.white,
         child: InkWell(
           onTap: () {
-            
             context.read<ComplaintCubit>().selectedBatchChanged(batch);
           },
           child: Padding(
@@ -177,7 +169,7 @@ Widget buildBatchListView(List<Batch> batchListForCustomer,
                     ],
                   ),
                 ),
-                percentage.isNaN || !isDashboard
+                percentage.isNaN
                     ? Container()
                     : WorkCompletionProgress(percentage: percentage)
               ],
@@ -241,8 +233,8 @@ Widget buildBatchListView(List<Batch> batchListForCustomer,
   );
 }*/
 
-Widget buildBmsSerialNoListView(List<String> bmsSerialNoList,
-    List<Complaint> complaintList, bool isDashboard) {
+Widget buildBmsSerialNoListView(
+    List<String> bmsSerialNoList, List<Complaint> complaintList) {
   return ListView.builder(
     shrinkWrap: true,
     itemCount: bmsSerialNoList.length,
@@ -277,12 +269,10 @@ Widget buildBmsSerialNoListView(List<String> bmsSerialNoList,
                     ],
                   ),
                 ),
-                isDashboard
-                    ? StatusDisplayWidget(
-                        complaintStatus:
-                            ind != -1 ? complaintList[index].status : null,
-                        isTappable: false)
-                    : Container()
+                StatusDisplayWidget(
+                    complaintStatus:
+                        ind != -1 ? complaintList[index].status : null,
+                    isTappable: false)
               ],
             ),
           ),
@@ -292,123 +282,220 @@ Widget buildBmsSerialNoListView(List<String> bmsSerialNoList,
   );
 }
 
-class ComplaintForm extends StatelessWidget {
+class ComplaintForm extends StatefulWidget {
   const ComplaintForm(
       {super.key,
-      required this.returnDateController,
-      required this.complaintController,
-      required this.observationController,
-      required this.commentController,
-      required this.solutionController,
-      required this.testingDoneByController,
       required this.selectedCustomer,
       required this.selectedBatchForCustomer,
-      required GlobalKey<FormState> formKey,
       required this.selectedBmsSerialNo,
-      required this.isDashBoard,
-      required this.complaintStatus,
-      required this.complaintId})
-      : _formKey = formKey;
+      required this.selectedVehicleManufacturer,
+      required this.filteredComplaint});
 
-  final TextEditingController returnDateController;
-  final TextEditingController complaintController;
-  final TextEditingController observationController;
-  final TextEditingController commentController;
-  final TextEditingController solutionController;
-  final TextEditingController testingDoneByController;
   final Customer? selectedCustomer;
   final Batch? selectedBatchForCustomer;
-  final GlobalKey<FormState> _formKey;
   final String? selectedBmsSerialNo;
-  final bool isDashBoard;
-  final String? complaintStatus;
-  final String? complaintId;
+  final VehicleManufacturer? selectedVehicleManufacturer;
+  final Complaint? filteredComplaint;
+
+  @override
+  State<ComplaintForm> createState() => _ComplaintFormState();
+}
+
+class _ComplaintFormState extends State<ComplaintForm> {
+  List<Make> makeList = [];
+  List<Harness> harnessList = [];
+  List<Bms> bmsList = [];
+  late MasterBloc masterBloc;
+  Harness? _selectedHarness;
+  Make? _selectedMake;
+  Bms? _selectedBms;
+  Complaint? _filteredComplaint;
+
+  @override
+  void initState() {
+    masterBloc = BlocProvider.of<MasterBloc>(context);
+    masterBloc.add(FetchHarnessEvent());
+    masterBloc.add(FetchMakeEvent());
+    masterBloc.add(FetchBmsEvent());
+    if (widget.filteredComplaint != null) {
+      commentController.text = widget.filteredComplaint!.comment ?? "";
+      complaintController.text = widget.filteredComplaint!.complaint ?? "";
+      observationController.text = widget.filteredComplaint!.observation ?? "";
+      returnDateController.text =
+          widget.filteredComplaint!.returnDate.toString();
+      solutionController.text = widget.filteredComplaint!.solution ?? "";
+      testingDoneByController.text =
+          widget.filteredComplaint!.testingDoneBy ?? "";
+      _filteredComplaint = widget.filteredComplaint;
+    }
+    super.initState();
+  }
+
+  TextEditingController returnDateController = TextEditingController();
+  TextEditingController complaintController = TextEditingController();
+  TextEditingController commentController = TextEditingController();
+  TextEditingController observationController = TextEditingController();
+  TextEditingController solutionController = TextEditingController();
+  TextEditingController testingDoneByController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    Complaint complaintData = Complaint(
-      id: complaintId ?? "",
-      status: "Not Resolved",
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        isDashBoard
-            ? StatusDisplayWidget(
-                complaintStatus: complaintStatus,
-                complaintId: complaintId,
-                isTappable: true,
-              )
-            : Container(),
-        buildTextFormFieldWithIcon(
-            controller: returnDateController,
-            labelText: 'Return Date',
-            icon: Icons.calendar_today,
-            readOnly: isDashBoard),
-        buildTextFormFieldWithIcon(
-            controller: complaintController,
-            labelText: 'Complaint',
-            icon: Icons.description,
-            maxLines: 3,
-            readOnly: isDashBoard),
-        buildTextFormFieldWithIcon(
-            controller: observationController,
-            labelText: 'Observation',
-            icon: Icons.description,
-            maxLines: 3,
-            readOnly: isDashBoard),
-        buildTextFormFieldWithIcon(
-            controller: commentController,
-            labelText: 'Comment',
-            icon: Icons.description,
-            maxLines: 3,
-            readOnly: isDashBoard),
-        buildTextFormFieldWithIcon(
-            controller: solutionController,
-            labelText: 'Solution',
-            icon: Icons.description,
-            maxLines: 3,
-            readOnly: isDashBoard),
-        buildTextFormFieldWithIcon(
-            controller: testingDoneByController,
-            labelText: 'Testing Done By',
-            icon: Icons.description,
-            readOnly: isDashBoard),
-        const SizedBox(height: 20),
-        BlocConsumer<InfoBloc, InfoState>(
-          listener: (context, state) {
-            if (state is ComplaintSubmitState) {
-              if (state.submissionStatus == SubmissionStatus.success) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Complaint added successfully")));
-              } else if (state.submissionStatus == SubmissionStatus.failure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Failed to lodge complaint")));
-              }
-            }
-          },
-          builder: (context, state) {
-            if (state is ComplaintSubmitState &&
-                state.submissionStatus == SubmissionStatus.inProgress) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            return isDashBoard
-                ? Container()
-                : ElevatedButton(
-                    onPressed: selectedCustomer != null &&
-                            selectedBatchForCustomer != null
+    final formKey = GlobalKey<FormState>();
+
+    return BlocConsumer<MasterBloc, MasterState>(
+      listener: (context, state) {
+        if (state is FetchMakeState &&
+            state.submissionStatus == SubmissionStatus.success) {
+          makeList = List.from(state.makeList);
+          int ind = makeList.indexWhere(
+              (element) => element.id == widget.filteredComplaint?.makeId);
+          if (ind != -1) {
+            _selectedMake = makeList[ind];
+          }
+        } else if (state is FetchHarnessState &&
+            state.submissionStatus == SubmissionStatus.success) {
+          harnessList = List.from(state.harnessList);
+          int ind = harnessList.indexWhere(
+              (element) => element.id == widget.filteredComplaint?.harnessId);
+          if (ind != -1) {
+            _selectedHarness = harnessList[ind];
+          }
+        } else if (state is FetchBmsState &&
+            state.submissionStatus == SubmissionStatus.success) {
+          bmsList = List.from(state.bmsList);
+          int ind = bmsList.indexWhere(
+              (element) => element.id == widget.filteredComplaint?.bmsId);
+          if (ind != -1) {
+            _selectedBms = bmsList[ind];
+          }
+        }
+      },
+      builder: (context, state) {
+        return Form(
+          key: formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _filteredComplaint != null
+                  ? StatusDisplayWidget(
+                      complaintStatus: widget.filteredComplaint?.status,
+                      complaintId: widget.filteredComplaint?.id,
+                      isTappable: true,
+                    )
+                  : Container(),
+              buildTextFormFieldWithIcon(
+                controller: returnDateController,
+                labelText: 'Return Date',
+                icon: Icons.calendar_today,
+              ),
+              buildTextFormFieldWithIcon(
+                controller: complaintController,
+                labelText: 'Complaint',
+                icon: Icons.description,
+                maxLines: 3,
+              ),
+              buildDropdownFormFieldWithIcon<Harness?>(
+                items: harnessList,
+                value: _selectedHarness,
+                onChanged: (newValue) {
+                  // Handle the value change
+                  setState(() {
+                    _selectedHarness = newValue;
+                  });
+                },
+                labelText: 'Select the Missing Harness',
+              ),
+              buildDropdownFormFieldWithIcon<Bms?>(
+                items: bmsList,
+                value: _selectedBms,
+                onChanged: (newValue) {
+                  // Handle the value change
+                  setState(() {
+                    _selectedBms = newValue;
+                  });
+                },
+                labelText: 'Select the BMS Type',
+              ),
+              buildDropdownFormFieldWithIcon<Make?>(
+                items: makeList,
+                value: _selectedMake,
+                onChanged: (newValue) {
+                  // Handle the value change
+                  setState(() {
+                    _selectedMake = newValue;
+                  });
+                },
+                labelText: 'Select the Make',
+              ),
+              buildTextFormFieldWithIcon(
+                controller: observationController,
+                labelText: 'Observation',
+                icon: Icons.description,
+                maxLines: 3,
+              ),
+              buildTextFormFieldWithIcon(
+                controller: commentController,
+                labelText: 'Comment',
+                icon: Icons.description,
+                maxLines: 3,
+              ),
+              buildTextFormFieldWithIcon(
+                controller: solutionController,
+                labelText: 'Solution',
+                icon: Icons.description,
+                maxLines: 3,
+              ),
+              buildTextFormFieldWithIcon(
+                controller: testingDoneByController,
+                labelText: 'Testing Done By',
+                icon: Icons.description,
+              ),
+              const SizedBox(height: 20),
+              BlocConsumer<InfoBloc, InfoState>(
+                listener: (context, state) {
+                  if (state is ComplaintSubmitState) {
+                    if (state.submissionStatus == SubmissionStatus.success) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text("Complaint added successfully")));
+                    } else if (state.submissionStatus ==
+                        SubmissionStatus.failure) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text("Failed to lodge complaint")));
+                    }
+                  }
+                },
+                builder: (context, state) {
+                  if (state is ComplaintSubmitState &&
+                      state.submissionStatus == SubmissionStatus.inProgress) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  return ElevatedButton(
+                    onPressed: widget.selectedCustomer != null &&
+                            widget.selectedBatchForCustomer != null &&
+                            widget.selectedCustomer != null &&
+                            widget.selectedBatchForCustomer != null &&
+                            widget.selectedVehicleManufacturer != null &&
+                            _selectedBms != null &&
+                            _selectedHarness != null &&
+                            _selectedMake != null &&
+                            widget.selectedBmsSerialNo != null
                         ? () {
-                            if (_formKey.currentState!.validate()) {
+                            if (formKey.currentState!.validate()) {
                               // Handle form submission
                               // Access the form field values using the controllers
                               Complaint complaintData = Complaint(
-                                id: complaintId ?? "",
-                                customerId: selectedCustomer!.id,
-                                batchId: selectedBatchForCustomer!.id,
-                                bmsId: "",
-                                bmsSerialNo: selectedBmsSerialNo!,
+                                id: widget.filteredComplaint?.id ?? "",
+                                customerId: widget.selectedCustomer!.id,
+                                batchId: widget.selectedBatchForCustomer!.id,
+                                harnessId: _selectedHarness!.id,
+                                makeId: _selectedMake!.id,
+                                vehicleManufacturerId:
+                                    widget.selectedVehicleManufacturer!.id,
+                                bmsId: _selectedBms!.id,
+                                bmsSerialNo: widget.selectedBmsSerialNo!,
                                 returnDate:
                                     DateTime.parse(returnDateController.text),
                                 complaint: complaintController.text,
@@ -418,6 +505,7 @@ class ComplaintForm extends StatelessWidget {
                                 testingDoneBy: testingDoneByController.text,
                                 status: "Not Resolved",
                               );
+                              _filteredComplaint = complaintData;
                               context.read<InfoBloc>().add(
                                   ComplaintSubmitButtonPressed(
                                       complaintData: complaintData));
@@ -426,9 +514,12 @@ class ComplaintForm extends StatelessWidget {
                         : null,
                     child: const Text('Submit'),
                   );
-          },
-        ),
-      ],
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
