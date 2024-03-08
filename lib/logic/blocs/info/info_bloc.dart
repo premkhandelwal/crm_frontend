@@ -1,7 +1,13 @@
 import 'package:crm/enums.dart';
+import 'package:crm/models/batch_request.dart';
+import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/complaint_request.dart';
+import 'package:crm/models/customer_request.dart';
+import 'package:crm/models/harness_request.dart';
+import 'package:crm/models/make_request.dart';
 import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/providers/api_provider.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'info_event.dart';
@@ -14,37 +20,21 @@ class InfoBloc extends Bloc<InfoEvent, InfoState> {
       void sendComplaintData(Complaint complaintData) async {
         emit(ComplaintSubmitState(
             submissionStatus: SubmissionStatus.inProgress));
-        await apiProvider.addComplaint(complaintData);
-        emit(ComplaintSubmitState(submissionStatus: SubmissionStatus.success));
+        Complaint complaint = await apiProvider.addComplaint(complaintData);
+        emit(ComplaintSubmitState(
+            submissionStatus: SubmissionStatus.success, complaint: complaint));
       }
 
-      void fetchComplaints(String customerId) async {
+      void fetchAllComplaints() async {
         emit(
             ComplaintFetchState(submissionStatus: SubmissionStatus.inProgress));
-        List<Complaint> complaintList =
-            await apiProvider.fetchComplaints(customerId);
+        List<Complaint> complaintList = await apiProvider.fetchAllComplaints();
         emit(ComplaintFetchState(
             submissionStatus: SubmissionStatus.success,
             complaintList: complaintList));
       }
 
       
-      
-      void fetchVehicleForCustomer(String customerId) async {
-        try {
-          emit(FetchVehicleForCustomerState(
-              submissionStatus: SubmissionStatus.inProgress));
-          List<VehicleManufacturer> vehicleManufacturerList =
-              await apiProvider.fetchVehicleManufacturerforCustomer(customerId);
-          emit(FetchVehicleForCustomerState(
-              submissionStatus: SubmissionStatus.success,
-              vehicleManufacturerList: vehicleManufacturerList));
-        } catch (e) {
-          emit(FetchVehicleForCustomerState(
-              submissionStatus: SubmissionStatus.failure));
-        }
-      }
-
       void updateComplaintStatus(Map<String, String?> complaint) async {
         try {
           emit(UpdateComplaintStatusState(status: SubmissionStatus.inProgress));
@@ -57,21 +47,38 @@ class InfoBloc extends Bloc<InfoEvent, InfoState> {
         }
       }
 
+      void exportToExcel(
+          List<Complaint> complaintList,
+          List<Customer> customerList,
+          List<VehicleManufacturer> vehicleManufacturerList,
+          List<Batch> batchList,
+          List<Bms> bmsList,
+          List<Harness> harnessList,
+          List<Make> makeList) async {
+        await apiProvider.exportToExcel(complaintList, customerList,
+            vehicleManufacturerList, batchList, bmsList, harnessList, makeList);
+      }
+
       switch (event.runtimeType) {
         case ComplaintSubmitButtonPressed:
           event as ComplaintSubmitButtonPressed;
           return sendComplaintData(event.complaintData);
-        case FetchComplaintsEvent:
-          event as FetchComplaintsEvent;
-          return fetchComplaints(event.customerId);
+        case FetchAllComplaintsEvent:
+          return fetchAllComplaints();
         
-       
-        case FetchVehicleForCustomerEvent:
-          event as FetchVehicleForCustomerEvent;
-          return fetchVehicleForCustomer(event.customerId);
         case UpdateComplaintStatusEvent:
           event as UpdateComplaintStatusEvent;
           return updateComplaintStatus(event.complaint);
+        case ExportToExcelEvent:
+          event as ExportToExcelEvent;
+          return exportToExcel(
+              event.complaintList,
+              event.customerList,
+              event.vehicleManufacturerList,
+              event.batchList,
+              event.bmsList,
+              event.harnessList,
+              event.makeList);
         default:
       }
     });

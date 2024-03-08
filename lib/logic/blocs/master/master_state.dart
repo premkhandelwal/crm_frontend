@@ -154,6 +154,7 @@ final class FetchBatchState extends MasterState {
 
   FetchBatchState({required this.submissionStatus, this.batchList = const []});
 }
+
 final class FetchBatchForVehicleManufacturerState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
@@ -180,4 +181,46 @@ final class AddBmsSrNoInBatchState extends MasterState {
   final SubmissionStatus submissionStatus;
 
   AddBmsSrNoInBatchState({required this.submissionStatus});
+}
+
+final class FetchAllVehicleManufacturerState extends MasterState {
+  @override
+  final SubmissionStatus submissionStatus;
+  final List<VehicleManufacturer> vehicleManufacturerList;
+
+  FetchAllVehicleManufacturerState(
+      {required this.submissionStatus,
+      this.vehicleManufacturerList = const []});
+}
+
+final class FetchVehicleForCustomerState extends MasterState {
+  @override
+  final SubmissionStatus submissionStatus;
+  final List<VehicleManufacturer> vehicleManufacturerList;
+
+  FetchVehicleForCustomerState(
+      {required this.submissionStatus,
+      this.vehicleManufacturerList = const []});
+}
+
+final class AddVehicleManufacturerState extends MasterState {
+  @override
+  final SubmissionStatus submissionStatus;
+
+  AddVehicleManufacturerState({required this.submissionStatus});
+}
+
+final class EditVehicleManufacturerState extends MasterState {
+  @override
+  final SubmissionStatus submissionStatus;
+
+  EditVehicleManufacturerState({required this.submissionStatus});
+}
+
+final class DeleteVehicleManufacturerState extends MasterState {
+  @override
+  final SubmissionStatus submissionStatus;
+  final VehicleManufacturer? deletedVehicleManufacturer;
+
+  DeleteVehicleManufacturerState({required this.submissionStatus, this.deletedVehicleManufacturer});
 }

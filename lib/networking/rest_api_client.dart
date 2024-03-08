@@ -86,23 +86,32 @@ abstract class RestApiClient {
   @POST(Apis.addBmsSrNoInBatch)
   Future<Batch> addBmsSrNoInBatch(@Body() Batch batchData);
 
-  
   @POST(Apis.addComplaint)
-  Future<Complaint> addComplaint(@Body() Complaint complaintRequest);    
+  Future<Complaint> addComplaint(@Body() Complaint complaintRequest);
 
-  @GET(Apis.fetchComplaint)
-  Future<List<Complaint>> fetchComplaints(
-      @Query("customerId") String customerId);
+  @GET(Apis.fetchComplaintForCustomer)
+  Future<List<Complaint>> fetchComplaintForCustomer();
+
+  @GET(Apis.fetchAllComplaints)
+  Future<List<Complaint>> fetchAllComplaints();
 
   @PUT(Apis.updateComplaintStatus)
-  Future<Complaint> updateComplaintStatus(@Body() Map<String, String?> complaint);
-  
-  @POST(Apis.addVehicleManufacturer)
-  Future<VehicleManufacturer> addVehicleManufacturer(@Body() VehicleManufacturer vehicleManufacturer);
+  Future<Complaint> updateComplaintStatus(
+      @Body() Map<String, String?> complaint);
+
+  @GET(Apis.fetchAllVehicleManufacturer)
+  Future<List<VehicleManufacturer>> fetchAllVehicleManufacturer();
 
   @GET(Apis.fetchVehicleManufacturer)
   Future<List<VehicleManufacturer>> fetchVehicleManufacturerforCustomer(
       @Query("customerId") String customerId);
 
+  @POST(Apis.addVehicleManufacturer)
+  Future<VehicleManufacturer> addVehicleManufacturer(@Body() VehicleManufacturer vehicleManufacturerData);
 
+  @PUT(Apis.editVehicleManufacturer)
+  Future<VehicleManufacturer> editVehicleManufacturer(@Body() VehicleManufacturer vehicleManufacturerData);
+
+  @DELETE(Apis.deleteVehicleManufacturer)
+  Future<VehicleManufacturer> deleteVehicleManufacturer(@Body() VehicleManufacturer vehicleManufacturerData);    
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 Widget buildDropdownFormFieldWithIcon<T>({
   required List<T> items,
@@ -48,6 +49,44 @@ Widget buildTextFormFieldWithIcon({
           prefixIcon: Icon(icon),
         ),
         maxLines: maxLines,
+      ),
+    ),
+  );
+}
+
+Widget buildDatePickerFormFieldWithIcon({
+  required TextEditingController controller,
+  required String labelText,
+  required IconData icon,
+  required BuildContext context,
+  bool readOnly = false,
+}) {
+  return ListTile(
+    title: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        readOnly: readOnly,
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: const OutlineInputBorder(),
+          contentPadding: const EdgeInsets.all(10.0),
+          prefixIcon: Icon(icon),
+        ),
+        onTap: () async {
+          await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2101),
+          ).then((selectedDate) => {
+                if (selectedDate != null)
+                  {
+                    controller.text =
+                        DateFormat('dd-MM-yyyy').format(selectedDate)
+                  }
+              });
+        },
       ),
     ),
   );

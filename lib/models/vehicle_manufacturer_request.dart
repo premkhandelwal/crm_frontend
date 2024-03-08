@@ -15,9 +15,17 @@ class VehicleManufacturer extends Equatable {
     required this.customerId,
   });
 
-  factory VehicleManufacturer.fromJson(Map<String, dynamic> json) => _$VehicleManufacturerFromJson(json);
+  factory VehicleManufacturer.fromJson(Map<String, dynamic> json) =>
+      _$VehicleManufacturerFromJson(json);
 
   Map<String, dynamic> toJson() => _$VehicleManufacturerToJson(this);
+
+  VehicleManufacturer copyWith({String? id, String? name, String? customerId}) {
+    return VehicleManufacturer(
+        name: name ?? this.name,
+        customerId: customerId ?? this.customerId,
+        id: id ?? this.id);
+  }
 
   @override
   List<Object?> get props => [id, name, customerId];

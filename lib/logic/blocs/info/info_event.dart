@@ -1,7 +1,9 @@
 part of 'info_bloc.dart';
 
-
-sealed class InfoEvent {}
+sealed class InfoEvent extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 
 class ComplaintSubmitButtonPressed extends InfoEvent {
   final Complaint complaintData;
@@ -9,10 +11,8 @@ class ComplaintSubmitButtonPressed extends InfoEvent {
   ComplaintSubmitButtonPressed({required this.complaintData});
 }
 
-class FetchComplaintsEvent extends InfoEvent {
-  final String customerId;
-
-  FetchComplaintsEvent({required this.customerId});
+class FetchAllComplaintsEvent extends InfoEvent {
+  FetchAllComplaintsEvent();
 }
 
 class UpdateComplaintStatusEvent extends InfoEvent {
@@ -23,10 +23,25 @@ class UpdateComplaintStatusEvent extends InfoEvent {
 
 
 
+class ExportToExcelEvent extends InfoEvent {
+  final List<Complaint> complaintList;
+  final List<Customer> customerList;
+  final List<VehicleManufacturer> vehicleManufacturerList;
+  final List<Batch> batchList;
+  final List<Bms> bmsList;
+  final List<Make> makeList;
+  final List<Harness> harnessList;
 
-class FetchVehicleForCustomerEvent extends InfoEvent {
-  final String customerId;
+  ExportToExcelEvent(
+      {required this.complaintList,
+      required this.customerList,
+      required this.vehicleManufacturerList,
+      required this.batchList,
+      required this.bmsList,
+      required this.makeList,
+      required this.harnessList});
 
-  FetchVehicleForCustomerEvent({required this.customerId});
+  @override
+  // TODO: implement props
+  List<Object?> get props => [DateTime.now()];
 }
-

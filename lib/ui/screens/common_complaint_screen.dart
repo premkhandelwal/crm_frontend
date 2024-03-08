@@ -36,7 +36,8 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
     complaintCubit = BlocProvider.of<ComplaintCubit>(context);
     masterBloc.add(FetchCustomerEvent());
     masterBloc.add(FetchBmsEvent());
-
+    masterBloc.add(FetchBatchEvent());
+    infoBloc.add(FetchAllComplaintsEvent());
     super.initState();
   }
 
@@ -62,10 +63,8 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
           selectedCustomer = complaintState.customer;
           filteredComplaintList.removeWhere(
               (element) => element.customerId != selectedCustomer?.id);
-          infoBloc.add(FetchVehicleForCustomerEvent(
+          masterBloc.add(FetchVehicleForCustomerEvent(
               customerId: complaintState.customer.id));
-          infoBloc.add(
-              FetchComplaintsEvent(customerId: complaintState.customer.id));
         } else if (complaintState is SelectedBatchChangedState) {
           layerInd = 3; //Into the Bms sr no screen
 
@@ -110,6 +109,10 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                     element.vehicleManufacturerId !=
                     selectedVehicleManufacturer?.id);
                 batchListForCustomer = customerState.batchList;
+              } else if (customerState is FetchVehicleForCustomerState &&
+                  customerState.submissionStatus == SubmissionStatus.success) {
+                vehicleManufacturerListForCustomer =
+                    List.from(customerState.vehicleManufacturerList);
               }
             },
             builder: (context, customerState) {
@@ -204,79 +207,79 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                             border: Border.all(color: Colors.grey.shade300),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: selectedCustomer == null
-                              ? buildCustomerWidget(customers)
-                              : BlocConsumer<InfoBloc, InfoState>(
-                                  listener: (context, state) {
-                                    if (state is FetchVehicleForCustomerState &&
-                                        state.submissionStatus ==
-                                            SubmissionStatus.success) {
-                                      vehicleManufacturerListForCustomer =
-                                          List.from(
-                                              state.vehicleManufacturerList);
-                                    } else if (state is ComplaintFetchState &&
-                                        state.submissionStatus ==
-                                            SubmissionStatus.success) {
-                                      complaintsList =
-                                          List.from(state.complaintList);
-                                      filteredComplaintList =
-                                          List.from(complaintsList);
-                                    } else if (state
-                                            is UpdateComplaintStatusState &&
-                                        state.status ==
-                                            SubmissionStatus.success) {
-                                      int indInComplaintList = -1;
-                                      int indInFilteredComplaintList = -1;
-                                      if (filteredComplaint != null) {
-                                        indInComplaintList = complaintsList
-                                            .indexOf(filteredComplaint!);
-                                        indInFilteredComplaintList =
-                                            filteredComplaintList
-                                                .indexOf(filteredComplaint!);
-                                      }
-                                      if (state.complaint != null) {
-                                        if (indInComplaintList != -1) {
-                                          complaintsList[indInComplaintList] =
-                                              state.complaint!;
-                                        }
-                                        if (indInFilteredComplaintList != -1) {
-                                          filteredComplaintList[
-                                                  indInFilteredComplaintList] =
-                                              state.complaint!;
-                                        }
-                                        filteredComplaint = state.complaint;
-                                      }
-                                    }
-                                  },
-                                  builder: (context, state) {
-                                    return layerInd == 1
-                                        ? buildVehicleManufacturerListView(
-                                            vehicleManufacturerListForCustomer,
-                                            filteredComplaintList)
-                                        : layerInd == 2
-                                            ? buildBatchListView(
-                                                batchListForCustomer,
-                                                filteredComplaintList)
-                                            : layerInd == 3
-                                                ? buildBmsSerialNoListView(
-                                                    serialNoListforSelectedBms,
-                                                    filteredComplaintList)
-                                                : (layerInd == 4)
-                                                    ? ComplaintForm(
-                                                        selectedCustomer:
-                                                            selectedCustomer,
-                                                        selectedBatchForCustomer:
-                                                            selectedBatchForCustomer,
-                                                        selectedVehicleManufacturer:
-                                                            selectedVehicleManufacturer,
-                                                        selectedBmsSerialNo:
-                                                            selectedBmsSerialNo,
-                                                        filteredComplaint:
-                                                            filteredComplaint,
-                                                      )
-                                                    : Container();
-                                  },
-                                ))
+                          child: BlocConsumer<InfoBloc, InfoState>(
+                            listener: (context, state) {
+                              if (state is ComplaintSubmitState &&
+                                  state.submissionStatus ==
+                                      SubmissionStatus.success) {
+                                if (state.complaint != null) {
+                                  complaintsList.add(state.complaint!);
+                                  filteredComplaintList.add(state.complaint!);
+                                  filteredComplaint = state.complaint;
+                                }
+                              }  else if (state is ComplaintFetchState &&
+                                  state.submissionStatus ==
+                                      SubmissionStatus.success) {
+                                complaintsList = List.from(state.complaintList);
+                                filteredComplaintList =
+                                    List.from(complaintsList);
+                              } else if (state is UpdateComplaintStatusState &&
+                                  state.status == SubmissionStatus.success) {
+                                int indInComplaintList = -1;
+                                int indInFilteredComplaintList = -1;
+                                if (filteredComplaint != null) {
+                                  filteredComplaint = state.complaint;
+
+                                  indInComplaintList = complaintsList
+                                      .indexOf(filteredComplaint!);
+                                  indInFilteredComplaintList =
+                                      filteredComplaintList
+                                          .indexOf(filteredComplaint!);
+                                }
+                                if (state.complaint != null) {
+                                  if (indInComplaintList != -1) {
+                                    complaintsList[indInComplaintList] =
+                                        state.complaint!;
+                                  }
+                                  if (indInFilteredComplaintList != -1) {
+                                    filteredComplaintList[
+                                            indInFilteredComplaintList] =
+                                        state.complaint!;
+                                  }
+                                }
+                              }
+                            },
+                            builder: (context, state) {
+                              return selectedCustomer == null
+                                  ? buildCustomerWidget(customers)
+                                  : layerInd == 1
+                                      ? buildVehicleManufacturerListView(
+                                          vehicleManufacturerListForCustomer,
+                                          filteredComplaintList)
+                                      : layerInd == 2
+                                          ? buildBatchListView(
+                                              batchListForCustomer,
+                                              filteredComplaintList)
+                                          : layerInd == 3
+                                              ? buildBmsSerialNoListView(
+                                                  serialNoListforSelectedBms,
+                                                  filteredComplaintList)
+                                              : (layerInd == 4)
+                                                  ? ComplaintForm(
+                                                      selectedCustomer:
+                                                          selectedCustomer,
+                                                      selectedBatchForCustomer:
+                                                          selectedBatchForCustomer,
+                                                      selectedVehicleManufacturer:
+                                                          selectedVehicleManufacturer,
+                                                      selectedBmsSerialNo:
+                                                          selectedBmsSerialNo,
+                                                      filteredComplaint:
+                                                          filteredComplaint,
+                                                    )
+                                                  : Container();
+                            },
+                          ))
                     ],
                   ),
                 ),

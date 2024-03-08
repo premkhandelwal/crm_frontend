@@ -12,6 +12,8 @@ import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/ui/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:pie_chart/pie_chart.dart';
 
 Widget buildUserActionDescription(
     Customer? selectedCustomer,
@@ -37,7 +39,6 @@ Widget buildUserActionDescription(
 Widget buildCustomerWidget(List<Customer> customers) {
   return ListView.builder(
     shrinkWrap: true,
-    // Your existing builder code...
     itemCount: customers.length,
     itemBuilder: (context, index) {
       return Card(
@@ -59,15 +60,6 @@ Widget buildCustomerWidget(List<Customer> customers) {
                   customers[index].name,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    context.read<ComplaintCubit>().selectedCustomerChanged(
-                          customers[index],
-                        );
-                  },
-                  icon: const Icon(Icons.visibility),
-                  label: const Text("View Details"),
-                ),
               ],
             ),
           ),
@@ -80,6 +72,13 @@ Widget buildCustomerWidget(List<Customer> customers) {
 Widget buildVehicleManufacturerListView(
     List<VehicleManufacturer> vehicleManufacturersList,
     List<Complaint> filteredComplaintList) {
+  Map<String, double> weightMap = {
+    "Completed": 0.66,
+    "Not Tested": 0.33,
+    "Dispatched": 1,
+    "Not Resolved": 1,
+    "Waste": 1,
+  };
   return ListView.builder(
     shrinkWrap: true,
     itemCount: vehicleManufacturersList.length,
@@ -89,8 +88,23 @@ Widget buildVehicleManufacturerListView(
           .where((element) =>
               element.vehicleManufacturerId == vehicleManufacturer.id)
           .toList();
-      double percentage =
+
+      Map<String, double> percentageMap =
           calculatePercentageOfWorkCompleted(filteredComplaintsBatch);
+      double percentageVal = 0.0;
+      for (var status in percentageMap.entries) {
+        double val = status.value;
+        if (val < 0) {
+          val = -val;
+        } else {
+          percentageVal += val;
+        }
+        double tot = (val / (weightMap[status.key] ?? 1));
+        print(tot);
+        percentageMap[status.key] = val / (weightMap[status.key] ?? 1);
+      }
+      double percentage =
+          (percentageVal / (filteredComplaintsBatch.length)) * 100;
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 5.0),
         color: Colors.white,
@@ -121,7 +135,10 @@ Widget buildVehicleManufacturerListView(
                 ),
                 percentage.isNaN
                     ? Container()
-                    : WorkCompletionProgress(percentage: percentage)
+                    : WorkCompletionProgress(
+                        percentage: percentage,
+                        percentageMap: percentageMap,
+                      )
               ],
             ),
           ),
@@ -133,6 +150,13 @@ Widget buildVehicleManufacturerListView(
 
 Widget buildBatchListView(
     List<Batch> batchListForCustomer, List<Complaint> filteredComplaintList) {
+  Map<String, double> weightMap = {
+    "Completed": 0.66,
+    "Not Tested": 0.33,
+    "Dispatched": 1,
+    "Not Resolved": 1,
+    "Waste": 1,
+  };
   return ListView.builder(
     shrinkWrap: true,
     itemCount: batchListForCustomer.length,
@@ -141,8 +165,22 @@ Widget buildBatchListView(
       List<Complaint> filteredComplaintsBatch = filteredComplaintList
           .where((element) => element.batchId == batch.id)
           .toList();
-      double percentage =
+
+      Map<String, double> percentageMap =
           calculatePercentageOfWorkCompleted(filteredComplaintsBatch);
+      double percentageVal = 0.0;
+      for (var status in percentageMap.entries) {
+        double val = status.value;
+        if (val < 0) {
+          val = -val;
+        } else {
+          percentageVal += val;
+        }
+        percentageMap[status.key] = val / (weightMap[status.key] ?? 1);
+      }
+      double percentage =
+          (percentageVal / (filteredComplaintsBatch.length)) * 100;
+
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 5.0),
         color: Colors.white,
@@ -171,7 +209,10 @@ Widget buildBatchListView(
                 ),
                 percentage.isNaN
                     ? Container()
-                    : WorkCompletionProgress(percentage: percentage)
+                    : WorkCompletionProgress(
+                        percentage: percentage,
+                        percentageMap: percentageMap,
+                      )
               ],
             ),
           ),
@@ -318,15 +359,16 @@ class _ComplaintFormState extends State<ComplaintForm> {
     masterBloc.add(FetchMakeEvent());
     masterBloc.add(FetchBmsEvent());
     if (widget.filteredComplaint != null) {
-      commentController.text = widget.filteredComplaint!.comment ?? "";
-      complaintController.text = widget.filteredComplaint!.complaint ?? "";
-      observationController.text = widget.filteredComplaint!.observation ?? "";
-      returnDateController.text =
-          widget.filteredComplaint!.returnDate.toString();
-      solutionController.text = widget.filteredComplaint!.solution ?? "";
-      testingDoneByController.text =
-          widget.filteredComplaint!.testingDoneBy ?? "";
       _filteredComplaint = widget.filteredComplaint;
+      commentController.text = _filteredComplaint!.comment ?? "";
+      complaintController.text = _filteredComplaint!.complaint ?? "";
+      observationController.text = _filteredComplaint!.observation ?? "";
+      if (_filteredComplaint!.returnDate != null) {
+        returnDateController.text =
+            DateFormat('dd-MM-yyyy').format(_filteredComplaint!.returnDate!);
+      }
+      solutionController.text = _filteredComplaint!.solution ?? "";
+      testingDoneByController.text = _filteredComplaint!.testingDoneBy ?? "";
     }
     super.initState();
   }
@@ -342,182 +384,188 @@ class _ComplaintFormState extends State<ComplaintForm> {
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
 
-    return BlocConsumer<MasterBloc, MasterState>(
-      listener: (context, state) {
-        if (state is FetchMakeState &&
-            state.submissionStatus == SubmissionStatus.success) {
-          makeList = List.from(state.makeList);
-          int ind = makeList.indexWhere(
-              (element) => element.id == widget.filteredComplaint?.makeId);
-          if (ind != -1) {
-            _selectedMake = makeList[ind];
+    return BlocConsumer<InfoBloc, InfoState>(
+      listener: (context, complaintState) {
+        if (complaintState is ComplaintSubmitState) {
+          if (complaintState.submissionStatus == SubmissionStatus.success) {
+            _filteredComplaint = complaintState.complaint;
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Complaint added successfully")));
+          } else if (complaintState.submissionStatus ==
+              SubmissionStatus.failure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Failed to lodge complaint")));
           }
-        } else if (state is FetchHarnessState &&
-            state.submissionStatus == SubmissionStatus.success) {
-          harnessList = List.from(state.harnessList);
-          int ind = harnessList.indexWhere(
-              (element) => element.id == widget.filteredComplaint?.harnessId);
-          if (ind != -1) {
-            _selectedHarness = harnessList[ind];
-          }
-        } else if (state is FetchBmsState &&
-            state.submissionStatus == SubmissionStatus.success) {
-          bmsList = List.from(state.bmsList);
-          int ind = bmsList.indexWhere(
-              (element) => element.id == widget.filteredComplaint?.bmsId);
-          if (ind != -1) {
-            _selectedBms = bmsList[ind];
-          }
+        } else if (complaintState is UpdateComplaintStatusState &&
+            complaintState.status == SubmissionStatus.success) {
+          _filteredComplaint = complaintState.complaint;
         }
       },
-      builder: (context, state) {
-        return Form(
-          key: formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _filteredComplaint != null
-                  ? StatusDisplayWidget(
-                      complaintStatus: widget.filteredComplaint?.status,
-                      complaintId: widget.filteredComplaint?.id,
-                      isTappable: true,
-                    )
-                  : Container(),
-              buildTextFormFieldWithIcon(
-                controller: returnDateController,
-                labelText: 'Return Date',
-                icon: Icons.calendar_today,
+      builder: (context, complaintState) {
+        return BlocConsumer<MasterBloc, MasterState>(
+          listener: (context, masterState) {
+            if (masterState is FetchMakeState &&
+                masterState.submissionStatus == SubmissionStatus.success) {
+              makeList = List.from(masterState.makeList);
+              int ind = makeList.indexWhere(
+                  (element) => element.id == widget.filteredComplaint?.makeId);
+              if (ind != -1) {
+                _selectedMake = makeList[ind];
+              }
+            } else if (masterState is FetchHarnessState &&
+                masterState.submissionStatus == SubmissionStatus.success) {
+              harnessList = List.from(masterState.harnessList);
+              int ind = harnessList.indexWhere((element) =>
+                  element.id == widget.filteredComplaint?.harnessId);
+              if (ind != -1) {
+                _selectedHarness = harnessList[ind];
+              }
+            } else if (masterState is FetchBmsState &&
+                masterState.submissionStatus == SubmissionStatus.success) {
+              bmsList = List.from(masterState.bmsList);
+              int ind = bmsList.indexWhere(
+                  (element) => element.id == widget.filteredComplaint?.bmsId);
+              if (ind != -1) {
+                _selectedBms = bmsList[ind];
+              }
+            }
+          },
+          builder: (context, masterState) {
+            if (masterState.submissionStatus == SubmissionStatus.inProgress) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            return Form(
+              key: formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _filteredComplaint != null
+                      ? StatusDisplayWidget(
+                          complaintStatus: _filteredComplaint?.status,
+                          complaintId: _filteredComplaint?.id,
+                          isTappable: true,
+                        )
+                      : Container(),
+                  buildDatePickerFormFieldWithIcon(
+                      controller: returnDateController,
+                      labelText: 'Return Date',
+                      icon: Icons.calendar_today,
+                      context: context),
+                  buildTextFormFieldWithIcon(
+                    controller: complaintController,
+                    labelText: 'Complaint',
+                    icon: Icons.description,
+                    maxLines: 3,
+                  ),
+                  buildDropdownFormFieldWithIcon<Harness?>(
+                    items: harnessList,
+                    value: _selectedHarness,
+                    onChanged: (newValue) {
+                      setState(() {
+                        _selectedHarness = newValue;
+                      });
+                    },
+                    labelText: 'Select the Missing Harness',
+                  ),
+                  buildDropdownFormFieldWithIcon<Bms?>(
+                    items: bmsList,
+                    value: _selectedBms,
+                    onChanged: (newValue) {
+                      setState(() {
+                        _selectedBms = newValue;
+                      });
+                    },
+                    labelText: 'Select the BMS Type',
+                  ),
+                  buildDropdownFormFieldWithIcon<Make?>(
+                    items: makeList,
+                    value: _selectedMake,
+                    onChanged: (newValue) {
+                      setState(() {
+                        _selectedMake = newValue;
+                      });
+                    },
+                    labelText: 'Select the Make',
+                  ),
+                  buildTextFormFieldWithIcon(
+                    controller: observationController,
+                    labelText: 'Observation',
+                    icon: Icons.description,
+                    maxLines: 3,
+                  ),
+                  buildTextFormFieldWithIcon(
+                    controller: commentController,
+                    labelText: 'Comment',
+                    icon: Icons.description,
+                    maxLines: 3,
+                  ),
+                  buildTextFormFieldWithIcon(
+                    controller: solutionController,
+                    labelText: 'Solution',
+                    icon: Icons.description,
+                    maxLines: 3,
+                  ),
+                  buildTextFormFieldWithIcon(
+                    controller: testingDoneByController,
+                    labelText: 'Testing Done By',
+                    icon: Icons.description,
+                  ),
+                  const SizedBox(height: 20),
+                  complaintState is ComplaintSubmitState &&
+                          complaintState.submissionStatus ==
+                              SubmissionStatus.inProgress
+                      ? const Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : ElevatedButton(
+                          onPressed: widget.selectedCustomer != null &&
+                                  widget.selectedBatchForCustomer != null &&
+                                  widget.selectedCustomer != null &&
+                                  widget.selectedBatchForCustomer != null &&
+                                  widget.selectedVehicleManufacturer != null &&
+                                  _selectedBms != null &&
+                                  _selectedHarness != null &&
+                                  _selectedMake != null &&
+                                  widget.selectedBmsSerialNo != null
+                              ? () {
+                                  if (formKey.currentState!.validate()) {
+                                    Complaint complaintData = Complaint(
+                                      id: widget.filteredComplaint?.id ?? "",
+                                      customerId: widget.selectedCustomer!.id,
+                                      batchId:
+                                          widget.selectedBatchForCustomer!.id,
+                                      harnessId: _selectedHarness!.id,
+                                      makeId: _selectedMake!.id,
+                                      vehicleManufacturerId: widget
+                                          .selectedVehicleManufacturer!.id,
+                                      bmsId: _selectedBms!.id,
+                                      bmsSerialNo: widget.selectedBmsSerialNo!,
+                                      returnDate: DateFormat('dd-MM-yyyy')
+                                          .tryParse(returnDateController.text),
+                                      complaint: complaintController.text,
+                                      comment: commentController.text,
+                                      observation: observationController.text,
+                                      solution: solutionController.text,
+                                      testingDoneBy:
+                                          testingDoneByController.text,
+                                      status: _filteredComplaint?.status ??
+                                          "Not Resolved",
+                                    );
+                                    _filteredComplaint = complaintData;
+                                    context.read<InfoBloc>().add(
+                                        ComplaintSubmitButtonPressed(
+                                            complaintData: complaintData));
+                                  }
+                                }
+                              : null,
+                          child: const Text('Submit'),
+                        )
+                ],
               ),
-              buildTextFormFieldWithIcon(
-                controller: complaintController,
-                labelText: 'Complaint',
-                icon: Icons.description,
-                maxLines: 3,
-              ),
-              buildDropdownFormFieldWithIcon<Harness?>(
-                items: harnessList,
-                value: _selectedHarness,
-                onChanged: (newValue) {
-                  // Handle the value change
-                  setState(() {
-                    _selectedHarness = newValue;
-                  });
-                },
-                labelText: 'Select the Missing Harness',
-              ),
-              buildDropdownFormFieldWithIcon<Bms?>(
-                items: bmsList,
-                value: _selectedBms,
-                onChanged: (newValue) {
-                  // Handle the value change
-                  setState(() {
-                    _selectedBms = newValue;
-                  });
-                },
-                labelText: 'Select the BMS Type',
-              ),
-              buildDropdownFormFieldWithIcon<Make?>(
-                items: makeList,
-                value: _selectedMake,
-                onChanged: (newValue) {
-                  // Handle the value change
-                  setState(() {
-                    _selectedMake = newValue;
-                  });
-                },
-                labelText: 'Select the Make',
-              ),
-              buildTextFormFieldWithIcon(
-                controller: observationController,
-                labelText: 'Observation',
-                icon: Icons.description,
-                maxLines: 3,
-              ),
-              buildTextFormFieldWithIcon(
-                controller: commentController,
-                labelText: 'Comment',
-                icon: Icons.description,
-                maxLines: 3,
-              ),
-              buildTextFormFieldWithIcon(
-                controller: solutionController,
-                labelText: 'Solution',
-                icon: Icons.description,
-                maxLines: 3,
-              ),
-              buildTextFormFieldWithIcon(
-                controller: testingDoneByController,
-                labelText: 'Testing Done By',
-                icon: Icons.description,
-              ),
-              const SizedBox(height: 20),
-              BlocConsumer<InfoBloc, InfoState>(
-                listener: (context, state) {
-                  if (state is ComplaintSubmitState) {
-                    if (state.submissionStatus == SubmissionStatus.success) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text("Complaint added successfully")));
-                    } else if (state.submissionStatus ==
-                        SubmissionStatus.failure) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text("Failed to lodge complaint")));
-                    }
-                  }
-                },
-                builder: (context, state) {
-                  if (state is ComplaintSubmitState &&
-                      state.submissionStatus == SubmissionStatus.inProgress) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  return ElevatedButton(
-                    onPressed: widget.selectedCustomer != null &&
-                            widget.selectedBatchForCustomer != null &&
-                            widget.selectedCustomer != null &&
-                            widget.selectedBatchForCustomer != null &&
-                            widget.selectedVehicleManufacturer != null &&
-                            _selectedBms != null &&
-                            _selectedHarness != null &&
-                            _selectedMake != null &&
-                            widget.selectedBmsSerialNo != null
-                        ? () {
-                            if (formKey.currentState!.validate()) {
-                              // Handle form submission
-                              // Access the form field values using the controllers
-                              Complaint complaintData = Complaint(
-                                id: widget.filteredComplaint?.id ?? "",
-                                customerId: widget.selectedCustomer!.id,
-                                batchId: widget.selectedBatchForCustomer!.id,
-                                harnessId: _selectedHarness!.id,
-                                makeId: _selectedMake!.id,
-                                vehicleManufacturerId:
-                                    widget.selectedVehicleManufacturer!.id,
-                                bmsId: _selectedBms!.id,
-                                bmsSerialNo: widget.selectedBmsSerialNo!,
-                                returnDate:
-                                    DateTime.parse(returnDateController.text),
-                                complaint: complaintController.text,
-                                comment: commentController.text,
-                                observation: observationController.text,
-                                solution: solutionController.text,
-                                testingDoneBy: testingDoneByController.text,
-                                status: "Not Resolved",
-                              );
-                              _filteredComplaint = complaintData;
-                              context.read<InfoBloc>().add(
-                                  ComplaintSubmitButtonPressed(
-                                      complaintData: complaintData));
-                            }
-                          }
-                        : null,
-                    child: const Text('Submit'),
-                  );
-                },
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -629,7 +677,6 @@ class StatusDialog extends StatefulWidget {
 class _StatusDialogState extends State<StatusDialog> {
   String? selectedStatus;
 
-  // Define colors for each status
   Map<String, Color> statusColors = {
     'Not Resolved': Colors.red,
     'Not Tested': Colors.orange,
@@ -662,7 +709,7 @@ class _StatusDialogState extends State<StatusDialog> {
                   "id": widget.complaintId,
                   "status": selectedStatus
                 }));
-            Navigator.pop(context); // Close the dialog
+            Navigator.pop(context);
             if (selectedStatus != null) {
               widget.onStatusSelected(selectedStatus);
             }
@@ -704,70 +751,171 @@ class _StatusDialogState extends State<StatusDialog> {
   }
 }
 
-double calculatePercentageOfWorkCompleted(List<Complaint> complaintList) {
-  int totalComplaints = complaintList.length;
+Map<String, double> calculatePercentageOfWorkCompleted(
+    List<Complaint> complaintList) {
+  Map<String, double> percentageMap = {};
   double completedWeight = 0.66;
   double notTestedWeight = 0.33;
   double dispatchedWeight = 1;
-  double notResolvedWeight = 0;
+  double notResolvedWeight = -1;
   double wasteWeight = 1;
   /* Not Resolved(0%), Not Tested(33%), Completed(66%), Dispatched(100%), Waste(Not to be considered in status)*/
 
-  double totalWeight = 0;
+  double totalCompletedWeight = 0;
+  double totalNotTestedWeight = 0;
+  double totalNotResolvedWeight = 0;
+  double totalNotDispatchedWeight = 0;
+  double totalWasteWeight = 0;
 
   for (var complaint in complaintList) {
     switch (complaint.status) {
       case "Completed":
-        totalWeight += completedWeight;
+        totalCompletedWeight += completedWeight;
         break;
       case "Not Tested":
-        totalWeight += notTestedWeight;
+        totalNotTestedWeight += notTestedWeight;
         break;
       case "Not Resolved":
-        totalWeight += notResolvedWeight;
+        totalNotResolvedWeight += notResolvedWeight;
+        break;
+
       case "Dispatched":
-        totalWeight += dispatchedWeight;
+        totalNotDispatchedWeight += dispatchedWeight;
+        break;
+
       case "Waste":
-        totalWeight += wasteWeight;
+        totalWasteWeight += wasteWeight;
+        break;
+
       default:
-        totalWeight += 0;
-      // Add more cases for other statuses if needed
     }
   }
+  percentageMap = {
+    "Not Tested": totalNotTestedWeight,
+    "Not Resolved": totalNotResolvedWeight,
+    "Completed": totalCompletedWeight,
+    "Dispatched": totalNotDispatchedWeight,
+    "Waste": totalWasteWeight,
+  };
 
-  // Calculate percentage of work completed
-  double percentageOfWorkCompleted = (totalWeight / totalComplaints) * 100;
-
-  return percentageOfWorkCompleted;
+  return percentageMap;
 }
 
-class WorkCompletionProgress extends StatelessWidget {
+class WorkCompletionProgress extends StatefulWidget {
   final double percentage;
+  final Map<String, double> percentageMap;
 
-  const WorkCompletionProgress({super.key, required this.percentage});
+  const WorkCompletionProgress(
+      {super.key, required this.percentage, required this.percentageMap});
 
   @override
+  State<WorkCompletionProgress> createState() => _WorkCompletionProgressState();
+}
+
+class _WorkCompletionProgressState extends State<WorkCompletionProgress> {
+  bool isHovered = false;
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text("$percentage%"),
-        Flexible(
-          child: SizedBox(
-            width: 60,
-            child: LinearProgressIndicator(
-              minHeight: 10,
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.black,
-              backgroundColor: Colors.black,
-              value: percentage / 100,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                  Colors.green), // Change color as needed
-            ),
+    return Tooltip(
+      message: "Show progress",
+      child: MouseRegion(
+        onEnter: (_) => setState(() {
+          isHovered = true;
+        }),
+        onExit: (_) => setState(() {
+          isHovered = false;
+        }),
+        child: GestureDetector(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("${widget.percentage.toStringAsFixed(2)}%"),
+              Flexible(
+                child: SizedBox(
+                  width: 60,
+                  child: LinearProgressIndicator(
+                    minHeight: 10,
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.black,
+                    backgroundColor: Colors.black,
+                    value: widget.percentage / 100,
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Colors.green),
+                  ),
+                ),
+              ),
+            ],
           ),
+          onTap: () {
+            _showPieChartDialog(
+              context,
+              widget.percentageMap,
+            );
+          },
         ),
-      ],
+      ),
     );
   }
+}
+
+void _showPieChartDialog(
+    BuildContext context, Map<String, double> percentageMap) {
+  Map<String, Color> colorMap = {
+    "Not Resolved": Colors.red,
+    "Not Tested": Colors.orange,
+    "Completed": Colors.green,
+    "Dispatched": Colors.blue,
+    "Waste": Colors.grey
+  };
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Center(
+            child: Text(
+          "Status",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        )),
+        content: SizedBox(
+          width: 500,
+          height: 500,
+          child: PieChart(
+            initialAngleInDegree: 0,
+            dataMap: percentageMap,
+            animationDuration: Duration.zero,
+            colorList: colorMap.values.toList(),
+            chartRadius: MediaQuery.of(context).size.width / 2,
+            ringStrokeWidth: 24,
+            chartValuesOptions: const ChartValuesOptions(
+                chartValueStyle: TextStyle(fontSize: 20),
+                showChartValues: true,
+                showChartValuesInPercentage: true,
+                showChartValueBackground: false),
+            legendOptions: const LegendOptions(
+                showLegends: true,
+                legendShape: BoxShape.rectangle,
+                legendTextStyle: TextStyle(fontSize: 15),
+                legendPosition: LegendPosition.bottom,
+                showLegendsInRow: true),
+          ),
+          /*PieChart(
+            PieChartData(
+              sections: percentageMap.entries
+                  .map((e) => PieChartSectionData(
+                      value: (e.value / 5) * 100,
+                      color: colorMap[e.key],
+                      title: "${e.key} (${e.value.toInt()})",
+                      radius: 100))
+                  .toList(),
+              borderData: FlBorderData(show: false),
+              centerSpaceRadius: 40,
+              sectionsSpace: 0,
+            ),
+          ),*/
+        ),
+      );
+    },
+  );
 }

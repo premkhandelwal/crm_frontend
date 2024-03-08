@@ -12,14 +12,11 @@ final class ComplaintInitial extends ComplaintState {}
 final class SelectedCustomerChangedState extends ComplaintState {
   final Customer customer;
 
-  const SelectedCustomerChangedState(
-      {required this.customer});
+  const SelectedCustomerChangedState({required this.customer});
 
   @override
-  List<Object> get props => [customer];
+  List<Object> get props => [DateTime.now()];
 }
-
-
 
 final class SelectedBatchChangedState extends ComplaintState {
   final Batch batch;

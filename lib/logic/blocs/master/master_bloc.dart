@@ -286,6 +286,70 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
         }
       }
 
+      void fetchAllVehicleManufacturer() async {
+        try {
+          emit(FetchAllVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.inProgress));
+          List<VehicleManufacturer> vehicleManufacturerList =
+              await apiProvider.fetchAllVehicleManufacturer();
+          emit(FetchAllVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.success,
+              vehicleManufacturerList: vehicleManufacturerList));
+        } catch (e) {
+          emit(FetchAllVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.failure));
+        }
+      }
+
+      void fetchVehicleForCustomer(String customerId) async {
+        try {
+          emit(FetchVehicleForCustomerState(
+              submissionStatus: SubmissionStatus.inProgress));
+          List<VehicleManufacturer> vehicleManufacturerList =
+              await apiProvider.fetchVehicleManufacturerforCustomer(customerId);
+          emit(FetchVehicleForCustomerState(
+              submissionStatus: SubmissionStatus.success,
+              vehicleManufacturerList: vehicleManufacturerList));
+        } catch (e) {
+          emit(FetchVehicleForCustomerState(
+              submissionStatus: SubmissionStatus.failure));
+        }
+      }
+
+      void addVehicleManufacturer(VehicleManufacturer vehicleManufacturerData) async {
+        try {
+          emit(AddVehicleManufacturerState(submissionStatus: SubmissionStatus.inProgress));
+          await apiProvider.addVehicleManufacturer(vehicleManufacturerData);
+          emit(AddVehicleManufacturerState(submissionStatus: SubmissionStatus.success));
+        } catch (e) {
+          emit(AddVehicleManufacturerState(submissionStatus: SubmissionStatus.failure));
+        }
+      }
+
+      void editVehicleManufacturer(VehicleManufacturer vehicleManufacturerData) async {
+        try {
+          emit(EditVehicleManufacturerState(submissionStatus: SubmissionStatus.inProgress));
+          await apiProvider.editVehicleManufacturer(vehicleManufacturerData);
+          emit(EditVehicleManufacturerState(submissionStatus: SubmissionStatus.success));
+        } catch (e) {
+          emit(EditVehicleManufacturerState(submissionStatus: SubmissionStatus.failure));
+        }
+      }
+
+      void deleteVehicleManufacturer(VehicleManufacturer vehicleManufacturerData) async {
+        try {
+          emit(DeleteVehicleManufacturerState(submissionStatus: SubmissionStatus.inProgress));
+          await apiProvider.deleteVehicleManufacturer(vehicleManufacturerData);
+          emit(DeleteVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.success,
+              deletedVehicleManufacturer: vehicleManufacturerData));
+        } catch (e) {
+          emit(DeleteVehicleManufacturerState(submissionStatus: SubmissionStatus.failure));
+        }
+      }
+
+
+
       switch (event.runtimeType) {
         case AddCustomerEvent:
           event as AddCustomerEvent;
@@ -351,6 +415,20 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
         case AddBmsSrNoInBatchEvent:
           event as AddBmsSrNoInBatchEvent;
           return addBmsSrNoInBatch(event.batch);
+        case FetchAllVehicleManufacturerEvent:
+          return fetchAllVehicleManufacturer();
+        case FetchVehicleForCustomerEvent:
+          event as FetchVehicleForCustomerEvent;
+          return fetchVehicleForCustomer(event.customerId);  
+        case AddVehicleManufacturerEvent:
+          event as AddVehicleManufacturerEvent;
+          return addVehicleManufacturer(event.vehicleManufacturerData);
+        case EditVehicleManufacturerEvent:
+          event as EditVehicleManufacturerEvent;
+          return editVehicleManufacturer(event.vehicleManufacturerData);
+        case DeleteVehicleManufacturerEvent:
+          event as DeleteVehicleManufacturerEvent;
+          return deleteVehicleManufacturer(event.vehicleManufacturerData);  
         default:
       }
     });

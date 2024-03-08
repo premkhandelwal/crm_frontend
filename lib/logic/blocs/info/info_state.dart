@@ -6,8 +6,8 @@ final class InfoInitial extends InfoState {}
 
 final class ComplaintSubmitState extends InfoState {
   final SubmissionStatus submissionStatus;
-
-  ComplaintSubmitState({required this.submissionStatus});
+  final Complaint? complaint;
+  ComplaintSubmitState({required this.submissionStatus, this.complaint});
 }
 
 final class ComplaintFetchState extends InfoState {
@@ -25,13 +25,3 @@ final class UpdateComplaintStatusState extends InfoState {
 }
 
 
-
-
-
-final class FetchVehicleForCustomerState extends InfoState {
-  final SubmissionStatus submissionStatus;
-  final List<VehicleManufacturer> vehicleManufacturerList;
-
-  FetchVehicleForCustomerState(
-      {required this.submissionStatus, this.vehicleManufacturerList = const []});
-}

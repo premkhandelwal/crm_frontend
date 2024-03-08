@@ -703,9 +703,9 @@ class _RestApiClient implements RestApiClient {
   }
 
   @override
-  Future<List<Complaint>> fetchComplaints(String customerId) async {
+  Future<List<Complaint>> fetchComplaintForCustomer() async {
     const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'customerId': customerId};
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final Map<String, dynamic>? _data = null;
     final _result =
@@ -716,7 +716,36 @@ class _RestApiClient implements RestApiClient {
     )
             .compose(
               _dio.options,
-              '/complaints/fetchComplaints',
+              '/complaints/fetchComplaintForCustomer',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    var value = _result.data!
+        .map((dynamic i) => Complaint.fromJson(i as Map<String, dynamic>))
+        .toList();
+    return value;
+  }
+
+  @override
+  Future<List<Complaint>> fetchAllComplaints() async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result =
+        await _dio.fetch<List<dynamic>>(_setStreamType<List<Complaint>>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/complaints/fetchAllComplaints',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -761,22 +790,20 @@ class _RestApiClient implements RestApiClient {
   }
 
   @override
-  Future<VehicleManufacturer> addVehicleManufacturer(
-      VehicleManufacturer vehicleManufacturer) async {
+  Future<List<VehicleManufacturer>> fetchAllVehicleManufacturer() async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(vehicleManufacturer.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<VehicleManufacturer>(Options(
-      method: 'POST',
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<List<dynamic>>(_setStreamType<List<VehicleManufacturer>>(Options(
+      method: 'GET',
       headers: _headers,
       extra: _extra,
     )
             .compose(
               _dio.options,
-              '/masters/addVehicleManufacturer',
+              '/masters/getAllVehicleManufacturer',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -785,7 +812,10 @@ class _RestApiClient implements RestApiClient {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = VehicleManufacturer.fromJson(_result.data!);
+    var value = _result.data!
+        .map((dynamic i) =>
+            VehicleManufacturer.fromJson(i as Map<String, dynamic>))
+        .toList();
     return value;
   }
 
@@ -817,6 +847,93 @@ class _RestApiClient implements RestApiClient {
         .map((dynamic i) =>
             VehicleManufacturer.fromJson(i as Map<String, dynamic>))
         .toList();
+    return value;
+  }
+
+  @override
+  Future<VehicleManufacturer> addVehicleManufacturer(
+      VehicleManufacturer vehicleManufacturerData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(vehicleManufacturerData.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<VehicleManufacturer>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/addVehicleManufacturer',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = VehicleManufacturer.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<VehicleManufacturer> editVehicleManufacturer(
+      VehicleManufacturer vehicleManufacturerData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(vehicleManufacturerData.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<VehicleManufacturer>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/editVehicleManufacturer',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = VehicleManufacturer.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<VehicleManufacturer> deleteVehicleManufacturer(
+      VehicleManufacturer vehicleManufacturerData) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(vehicleManufacturerData.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<VehicleManufacturer>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/masters/deleteVehicleManufacturer',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = VehicleManufacturer.fromJson(_result.data!);
     return value;
   }
 

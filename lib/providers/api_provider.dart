@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:crm/models/batch_request.dart';
 import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/complaint_request.dart';
@@ -7,6 +9,7 @@ import 'package:crm/models/make_request.dart';
 import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/networking/dio_builder.dart';
 import 'package:crm/networking/rest_api_client.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ApiProvider {
   final RestApiClient restApiClient;
@@ -103,21 +106,39 @@ class ApiProvider {
     return batchList;
   }
 
-  Future<List<Batch>> fetchBatchforVehicleManufacturer(String vehicleManufacturerId) async {
-    List<Batch> batchList =
-        await restApiClient.fetchBatchforVehicleManufacturer(vehicleManufacturerId);
+  Future<List<Batch>> fetchBatchforVehicleManufacturer(
+      String vehicleManufacturerId) async {
+    List<Batch> batchList = await restApiClient
+        .fetchBatchforVehicleManufacturer(vehicleManufacturerId);
     return batchList;
   }
 
-  Future<List<VehicleManufacturer>> fetchVehicleManufacturerforCustomer(String customerId) async {
+  Future<List<VehicleManufacturer>> fetchVehicleManufacturerforCustomer(
+      String customerId) async {
     List<VehicleManufacturer> vehicleManufacturerList =
         await restApiClient.fetchVehicleManufacturerforCustomer(customerId);
     return vehicleManufacturerList;
   }
 
-  
+  Future<List<VehicleManufacturer>> fetchAllVehicleManufacturer() async {
+    List<VehicleManufacturer> vehicleManufacturerList =
+        await restApiClient.fetchAllVehicleManufacturer();
+    return vehicleManufacturerList;
+  }
 
-  Future addComplaint(Complaint complaint) async {
+  Future addVehicleManufacturer(VehicleManufacturer vehicleManufacturerData) async {
+    return restApiClient.addVehicleManufacturer(vehicleManufacturerData);
+  }
+
+  Future editVehicleManufacturer(VehicleManufacturer vehicleManufacturerData) async {
+    return restApiClient.editVehicleManufacturer(vehicleManufacturerData);
+  }
+
+  Future deleteVehicleManufacturer(VehicleManufacturer vehicleManufacturerData) async {
+    return restApiClient.deleteVehicleManufacturer(vehicleManufacturerData);
+  }
+
+  Future<Complaint> addComplaint(Complaint complaint) async {
     return restApiClient.addComplaint(complaint);
   }
 
@@ -125,13 +146,75 @@ class ApiProvider {
     return restApiClient.addBmsSrNoInBatch(batch);
   }
 
-  Future<List<Complaint>> fetchComplaints(String customerId) async {
-    List<Complaint> complaintList =
-        await restApiClient.fetchComplaints(customerId);
+  Future<List<Complaint>> fetchAllComplaints() async {
+    List<Complaint> complaintList = await restApiClient.fetchAllComplaints();
     return complaintList;
   }
 
-  Future updateComplaintStatus(Map<String, String?> complaint) async {
+  Future updateComplaintStatus(
+    Map<String, String?> complaint,
+  ) async {
     return restApiClient.updateComplaintStatus(complaint);
+  }
+
+  Future<void> exportToExcel(
+      List<Complaint> complaintList,
+      List<Customer> customerList,
+      List<VehicleManufacturer> vehicleManufacturerList,
+      List<Batch> batchList,
+      List<Bms> bmsList,
+      List<Harness> harnessList,
+      List<Make> makeList) async {
+    String? filePath = await FilePicker.platform.saveFile(
+      type: FileType.custom,
+      allowedExtensions: ['csv'], // Add more extensions if needed
+    );
+
+    // Check if the user canceled the file picker
+    if (filePath == null) return;
+    File file = File(filePath);
+    IOSink sink = file.openWrite();
+
+    // Write header if needed
+    sink.writeln(
+        'Lot Number,BMS No,Return Date, Complaint, Missing Harness, BMS Details, Make, Customer, Behaviour, Reason/Comment, Solution, Tester, Status'); // Replace with your headers
+
+    // Write data to the file
+    for (Complaint complaintData in complaintList) {
+      int customerInd = customerList
+          .indexWhere((element) => element.id == complaintData.customerId);
+      int vehicleManufacturerInd = vehicleManufacturerList.indexWhere(
+          (element) => element.id == complaintData.vehicleManufacturerId);
+      int batchInd = batchList
+          .indexWhere((element) => element.id == complaintData.batchId);
+      int bmsInd =
+          bmsList.indexWhere((element) => element.id == complaintData.bmsId);
+      int harnessInd = harnessList
+          .indexWhere((element) => element.id == complaintData.harnessId);
+      int makeInd =
+          makeList.indexWhere((element) => element.id == complaintData.makeId);
+      if (customerInd != -1 &&
+          vehicleManufacturerInd != -1 &&
+          batchInd != -1 &&
+          bmsInd != -1 &&
+          harnessInd != -1 &&
+          makeInd != -1) {
+        sink.writeln(
+          '${customerList[customerInd].name} ${vehicleManufacturerList[vehicleManufacturerInd].name} ${batchList[batchInd].batchName},${complaintData.bmsSerialNo}, ${complaintData.returnDate}, ${complaintData.complaint}, ${harnessList[harnessInd].name}, ${bmsList[bmsInd].details}, ${makeList[makeInd].name}, ${customerList[customerInd].name}, ${complaintData.observation}, ${complaintData.comment}, ${complaintData.solution}, ${complaintData.testingDoneBy}, ${complaintData.status}',
+        ); // Replace with your data properties
+      }
+    }
+
+    // Close the file
+    sink.close();
+    return;
+  }
+
+  void exportDataToFile(List<Complaint> dataList, String filePath) {
+    try {
+      // Open the file for writing
+    } catch (e) {
+      print('Error exporting data: $e');
+    }
   }
 }

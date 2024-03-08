@@ -120,3 +120,30 @@ class AddBmsSrNoInBatchEvent extends MasterEvent {
 
   AddBmsSrNoInBatchEvent({required this.batch});
 }
+
+class FetchAllVehicleManufacturerEvent extends MasterEvent {}
+
+class FetchVehicleForCustomerEvent extends MasterEvent {
+  final String customerId;
+
+  FetchVehicleForCustomerEvent({required this.customerId});
+}
+
+
+final class AddVehicleManufacturerEvent extends MasterEvent {
+  final VehicleManufacturer vehicleManufacturerData;
+
+  AddVehicleManufacturerEvent({required this.vehicleManufacturerData});
+}
+
+final class EditVehicleManufacturerEvent extends MasterEvent {
+  final VehicleManufacturer vehicleManufacturerData;
+
+  EditVehicleManufacturerEvent({required this.vehicleManufacturerData});
+}
+
+final class DeleteVehicleManufacturerEvent extends MasterEvent {
+  final VehicleManufacturer vehicleManufacturerData;
+
+  DeleteVehicleManufacturerEvent({required this.vehicleManufacturerData});
+}
