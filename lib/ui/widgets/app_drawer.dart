@@ -41,6 +41,7 @@ class _AppDrawerState extends State<AppDrawer> {
             // Using UserAccountsDrawerHeader for convenience
             currentAccountPicture: avatar(),
             accountName: accountName(),
+
             accountEmail: null,
           ),
           const Divider(),
@@ -188,7 +189,8 @@ class _AppDrawerState extends State<AppDrawer> {
               complaintFetchSuccess = true;
               complaintsList = List.from(infoState.complaintList);
             } else if (infoState is ComplaintFetchState &&
-                infoState.submissionStatus == SubmissionStatus.inProgress && exportToExcel) {
+                infoState.submissionStatus == SubmissionStatus.inProgress &&
+                exportToExcel) {
               ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Preparing export..")));
             }
@@ -209,22 +211,6 @@ class _AppDrawerState extends State<AppDrawer> {
           ),
         ),
       ),
-      /*ListTile(
-        leading: Icon(Icons.circle, color: Theme.of(context).primaryColor),
-        title: const Text("Add BMS in Batch"),
-        onTap: () {
-          appCubit.appPageChaged(const AddBmsInBatchScreen());
-        },
-      ),
-      ListTile(
-        leading: Icon(Icons.circle, color: Theme.of(context).primaryColor),
-        title: const Text("Add Complaint"),
-        onTap: () {
-          appCubit.appPageChaged(const CommonComplaintScreen(
-            isDashBoard: false,
-          ));
-        },
-      ),*/
     ];
   }
 
@@ -236,9 +222,22 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 
   Widget accountName() {
-    return Text(
-      "CRM-U",
-      style: Theme.of(context).textTheme.titleLarge,
+    return Column(
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            "CRM-Webber",
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+        const Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: EdgeInsets.only(right: 8.0),
+              child: Text("v1.0.0.s"),
+            ))
+      ],
     );
   }
 }
