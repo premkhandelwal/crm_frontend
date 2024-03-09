@@ -63,7 +63,10 @@ class _AddVehicleManufacturerScreenState
             if (widget.isEdit || widget.editVehicleManufacturer != null) {
               int ind = customerList.indexWhere((element) =>
                   element.id == widget.editVehicleManufacturer!.customerId);
+              if(ind != -1){
               selectedCustomer = customerList[ind];
+
+              }    
             }
           }
         },

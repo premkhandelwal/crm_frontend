@@ -183,17 +183,29 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
             },
             builder: (context, customerState) {
               // Your existing UI code...
-              if (customerState is FetchCustomerState &&
-                  customerState.submissionStatus ==
-                      SubmissionStatus.inProgress) {
-                return const Column(
+              if (customerState.submissionStatus ==
+                  SubmissionStatus.inProgress) {
+                return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Center(
+                    const Center(
                       child: CircularProgressIndicator(),
                     ),
-                    Center(child: Text("Fetching customers"))
+                    Center(
+                        child: Text((customerState is FetchCustomerState
+                            ? "Fetching customers..."
+                            : customerState is FetchVehicleForCustomerState
+                                ? "Fetching vehicle manufacturers..."
+                                : customerState is FetchBatchForVehicleManufacturerState
+                                    ? "Fetching batch..."
+                                    : customerState is FetchBmsState
+                                        ? "Fetching BMS..."
+                                        : customerState is FetchHarnessState
+                                            ? "Fetching Harness..."
+                                            : customerState is FetchMakeState
+                                                ? "Fetching Make..."
+                                                : "Fetching...")))
                   ],
                 );
               }

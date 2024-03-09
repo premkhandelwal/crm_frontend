@@ -3,7 +3,7 @@ class Apis {
   static const String devBaseUrl = "http://localhost:3000/api/";
   static const String prodBaseUrl =
       "https://apricot-hummingbird-tam.cyclic.app/api/";
-  static const String activeBaseUrl = devBaseUrl;
+  static const String activeBaseUrl = prodBaseUrl;
 
   // API Paths
   static const String addCustomer = "/masters/addCustomer";

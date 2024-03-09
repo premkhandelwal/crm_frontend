@@ -13,7 +13,7 @@ class _RestApiClient implements RestApiClient {
     this._dio, {
     this.baseUrl,
   }) {
-    baseUrl ??= 'http://localhost:3000/api/';
+    baseUrl ??= 'https://apricot-hummingbird-tam.cyclic.app/api/';
   }
 
   final Dio _dio;
