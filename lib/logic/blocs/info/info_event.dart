@@ -42,6 +42,5 @@ class ExportToExcelEvent extends InfoEvent {
       required this.harnessList});
 
   @override
-  // TODO: implement props
   List<Object?> get props => [DateTime.now()];
 }

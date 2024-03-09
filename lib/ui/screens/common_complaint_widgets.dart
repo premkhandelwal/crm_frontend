@@ -99,8 +99,6 @@ Widget buildVehicleManufacturerListView(
         } else {
           percentageVal += val;
         }
-        double tot = (val / (weightMap[status.key] ?? 1));
-        print(tot);
         percentageMap[status.key] = val / (weightMap[status.key] ?? 1);
       }
       double percentage =
