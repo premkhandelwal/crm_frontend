@@ -4,17 +4,21 @@ import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/batch_request.dart';
 import 'package:crm/models/customer_request.dart';
+import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/ui/screens/view_screen.dart/view_batch_screen.dart';
 import 'package:crm/ui/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 List<Customer> customerList = [];
+List<VehicleManufacturer> vehicleManufacturerList = [];
 
 class AddBatchScreen extends StatefulWidget {
   final bool isEdit;
   final Batch? editBatch;
-  const AddBatchScreen({Key? key, this.isEdit = false, this.editBatch})
+  final bool returnData;
+  const AddBatchScreen(
+      {Key? key, this.isEdit = false, this.editBatch, this.returnData = false})
       : super(key: key);
 
   @override
@@ -30,12 +34,14 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
   late MasterBloc masterBloc;
 
   Customer? selectedCustomer;
+  VehicleManufacturer? selectedVehicleManufacturer;
 
   @override
   void initState() {
     if (widget.isEdit) {
       batchNameController.text = widget.editBatch!.batchName;
     }
+    if (widget.editBatch != null) {}
     masterBloc = BlocProvider.of<MasterBloc>(context);
     masterBloc.add(FetchCustomerEvent());
     super.initState();
@@ -52,9 +58,25 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
           if (customerState is FetchCustomerState &&
               customerState.submissionStatus == SubmissionStatus.success) {
             customerList = List.from(customerState.customerList);
-            if (widget.isEdit) {
-              selectedCustomer = customerList.firstWhere(
+            if (widget.isEdit || widget.editBatch != null) {
+              int ind = customerList.indexWhere(
                   (element) => element.id == widget.editBatch!.customerId);
+              if (ind != -1) {
+                selectedCustomer = customerList[ind];
+              }
+              masterBloc.add(FetchVehicleForCustomerEvent(
+                  customerId: selectedCustomer!.id));
+            }
+          } else if (customerState is FetchVehicleForCustomerState &&
+              customerState.submissionStatus == SubmissionStatus.success) {
+            vehicleManufacturerList =
+                List.from(customerState.vehicleManufacturerList);
+            if (widget.editBatch != null) {
+              int ind = vehicleManufacturerList.indexWhere((element) =>
+                  element.id == widget.editBatch?.vehicleManufacturerId);
+              if (ind != -1) {
+                selectedVehicleManufacturer = vehicleManufacturerList[ind];
+              }
             }
           }
         },
@@ -73,10 +95,28 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
                       onChanged: (newValue) {
                         // Handle the value change
                         setState(() {
+                          vehicleManufacturerList = [];
+                          selectedVehicleManufacturer = null;
                           selectedCustomer = newValue;
+                          if (selectedCustomer != null) {
+                            masterBloc.add(FetchVehicleForCustomerEvent(
+                                customerId: selectedCustomer!.id));
+                          }
                         });
                       },
                       labelText: 'Select the Customer',
+                    ),
+                    const SizedBox(height: 10),
+                    buildDropdownFormFieldWithIcon<VehicleManufacturer?>(
+                      items: vehicleManufacturerList,
+                      value: selectedVehicleManufacturer,
+                      onChanged: (newValue) {
+                        // Handle the value change
+                        setState(() {
+                          selectedVehicleManufacturer = newValue;
+                        });
+                      },
+                      labelText: 'Select the Vehicle Manufacturer',
                     ),
                     const SizedBox(height: 10),
                     buildTextFormFieldWithIcon(
@@ -90,12 +130,17 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
                         if (state is AddBatchState || state is EditBatchState) {
                           if (state.submissionStatus ==
                               SubmissionStatus.success) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(
-                                    "Batch ${widget.isEdit ? 'edited' : 'added'} successfully")));
-                            context
-                                .read<AppCubit>()
-                                .appPageChaged(const ViewBatchScreen());
+                            if (widget.returnData) {
+                              state as AddBatchState;
+                              Navigator.pop(context, state.batch);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                  content: Text(
+                                      "Batch ${widget.isEdit ? 'edited' : 'added'} successfully")));
+                              context
+                                  .read<AppCubit>()
+                                  .appPageChaged(const ViewBatchScreen());
+                            }
                           } else if (state.submissionStatus ==
                               SubmissionStatus.failure) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -114,26 +159,30 @@ class _AddBatchScreenState extends State<AddBatchScreen> {
                           );
                         }
                         return ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              // Handle form submission
-                              // Access the form field values using the controllers
-                              Batch batchData = Batch(
-                                batchName: batchNameController.text,
-                                customerId: selectedCustomer!.id,
-                              );
-                              if (widget.isEdit) {
-                                batchData = batchData.copyWith(
-                                    id: widget.editBatch!.id);
+                          onPressed: selectedCustomer != null &&
+                                  selectedVehicleManufacturer != null
+                              ? () {
+                                  if (_formKey.currentState!.validate()) {
+                                    // Handle form submission
+                                    // Access the form field values using the controllers
+                                    Batch batchData = Batch(
+                                        batchName: batchNameController.text,
+                                        customerId: selectedCustomer!.id,
+                                        vehicleManufacturerId:
+                                            selectedVehicleManufacturer!.id);
+                                    if (widget.isEdit) {
+                                      batchData = batchData.copyWith(
+                                          id: widget.editBatch!.id);
 
-                                masterBloc
-                                    .add(EditBatchEvent(batchData: batchData));
-                              } else {
-                                masterBloc
-                                    .add(AddBatchEvent(batchData: batchData));
-                              }
-                            }
-                          },
+                                      masterBloc.add(
+                                          EditBatchEvent(batchData: batchData));
+                                    } else {
+                                      masterBloc.add(
+                                          AddBatchEvent(batchData: batchData));
+                                    }
+                                  }
+                                }
+                              : null,
                           child: const Text('Submit'),
                         );
                       },

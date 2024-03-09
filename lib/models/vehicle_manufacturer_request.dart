@@ -29,4 +29,9 @@ class VehicleManufacturer extends Equatable {
 
   @override
   List<Object?> get props => [id, name, customerId];
+
+  @override
+  String toString() {
+    return name;
+  }
 }

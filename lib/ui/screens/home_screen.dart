@@ -1,4 +1,3 @@
-import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/ui/screens/common_complaint_screen.dart';
 import 'package:crm/ui/widgets/app_drawer.dart';
@@ -17,14 +16,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late MasterBloc masterBloc;
 
   @override
   void initState() {
-    masterBloc = BlocProvider.of<MasterBloc>(context);
-    masterBloc.add(FetchAllVehicleManufacturerEvent());
-    masterBloc.add(FetchMakeEvent());
-    masterBloc.add(FetchHarnessEvent());
     super.initState();
   }
 

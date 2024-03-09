@@ -7,10 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddCustomerScreen extends StatefulWidget {
+  final bool returnData;
   final bool isEdit;
   final Customer? editCustomerData;
   const AddCustomerScreen(
-      {Key? key, this.isEdit = false, this.editCustomerData})
+      {Key? key,
+      this.returnData = false,
+      this.isEdit = false,
+      this.editCustomerData})
       : super(key: key);
 
   @override
@@ -59,12 +63,17 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     if (state is AddCustomerState ||
                         state is EditCustomerState) {
                       if (state.submissionStatus == SubmissionStatus.success) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                                "Customer ${widget.isEdit ? 'edited' : 'added'} successfully")));
-                        context
-                            .read<AppCubit>()
-                            .appPageChaged(const ViewCustomerScreen());
+                        if (widget.returnData) {
+                          state as AddCustomerState;
+                          Navigator.pop(context, state.customer);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(
+                                  "Customer ${widget.isEdit ? 'edited' : 'added'} successfully")));
+                          context
+                              .read<AppCubit>()
+                              .appPageChaged(const ViewCustomerScreen());
+                        }
                       } else if (state.submissionStatus ==
                           SubmissionStatus.failure) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

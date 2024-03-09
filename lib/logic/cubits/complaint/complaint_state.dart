@@ -15,7 +15,7 @@ final class SelectedCustomerChangedState extends ComplaintState {
   const SelectedCustomerChangedState({required this.customer});
 
   @override
-  List<Object> get props => [DateTime.now()];
+  List<Object> get props => [customer];
 }
 
 final class SelectedBatchChangedState extends ComplaintState {

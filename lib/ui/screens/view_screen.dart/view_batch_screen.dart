@@ -3,6 +3,7 @@ import 'package:crm/logic/blocs/master/master_bloc.dart';
 import 'package:crm/logic/cubits/app/app_cubit.dart';
 import 'package:crm/models/batch_request.dart';
 import 'package:crm/models/customer_request.dart';
+import 'package:crm/models/vehicle_manufacturer_request.dart';
 import 'package:crm/ui/screens/add_screens/add_batch_screen.dart';
 import 'package:crm/ui/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 List<Batch> batchList = [];
 List<Customer> customerList = [];
+List<VehicleManufacturer> vehicleManufacturerList = [];
 
 class ViewBatchScreen extends StatefulWidget {
   const ViewBatchScreen({super.key});
@@ -22,6 +24,7 @@ class _ViewBatchScreenState extends State<ViewBatchScreen> {
   late AppCubit appCubit;
 
   Customer? selectedCustomer;
+  VehicleManufacturer? selectedVehicleManufacturer;
 
   @override
   void initState() {
@@ -55,9 +58,13 @@ class _ViewBatchScreenState extends State<ViewBatchScreen> {
         builder: (context, state) {
           return BlocConsumer<MasterBloc, MasterState>(
             listener: (context, state) {
-              if (state is FetchBatchForCustomerState &&
+              if (state is FetchBatchForVehicleManufacturerState &&
                   state.submissionStatus == SubmissionStatus.success) {
                 batchList = List.from(state.batchList);
+              } else if (state is FetchVehicleForCustomerState &&
+                  state.submissionStatus == SubmissionStatus.success) {
+                vehicleManufacturerList =
+                    List.from(state.vehicleManufacturerList);
               }
             },
             builder: (context, state) {
@@ -68,18 +75,37 @@ class _ViewBatchScreenState extends State<ViewBatchScreen> {
                     value: selectedCustomer,
                     onChanged: (newValue) {
                       if (newValue != null) {
+                        vehicleManufacturerList = [];
+                        selectedVehicleManufacturer = null;
                         context.read<MasterBloc>().add(
-                            FetchBatchForCustomerEvent(
+                            FetchVehicleForCustomerEvent(
                                 customerId: newValue.id));
                       }
-              
+
                       setState(() {
                         selectedCustomer = newValue;
                       });
                     },
                     labelText: 'Select the Customer',
                   ),
-                  selectedCustomer != null
+                  buildDropdownFormFieldWithIcon<VehicleManufacturer?>(
+                    items: vehicleManufacturerList,
+                    value: selectedVehicleManufacturer,
+                    onChanged: (newValue) {
+                      // Handle the value change
+
+                      setState(() {
+                        selectedVehicleManufacturer = newValue;
+                        if (newValue != null) {
+                          context.read<MasterBloc>().add(
+                              FetchBatchForVehicleManufacturerEvent(
+                                  vehicleManufacturerId: newValue));
+                        }
+                      });
+                    },
+                    labelText: 'Select the Vehicle Manufacturer',
+                  ),
+                  selectedVehicleManufacturer != null
                       ? _buildBatchListView(batchList)
                       : Container()
                 ],

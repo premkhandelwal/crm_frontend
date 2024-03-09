@@ -14,8 +14,12 @@ List<Customer> customerList = [];
 class AddVehicleManufacturerScreen extends StatefulWidget {
   final bool isEdit;
   final VehicleManufacturer? editVehicleManufacturer;
+  final bool returnData;
   const AddVehicleManufacturerScreen(
-      {Key? key, this.isEdit = false, this.editVehicleManufacturer})
+      {Key? key,
+      this.isEdit = false,
+      this.editVehicleManufacturer,
+      this.returnData = false})
       : super(key: key);
 
   @override
@@ -56,9 +60,10 @@ class _AddVehicleManufacturerScreenState
           if (customerState is FetchCustomerState &&
               customerState.submissionStatus == SubmissionStatus.success) {
             customerList = List.from(customerState.customerList);
-            if (widget.isEdit) {
-              selectedCustomer = customerList.firstWhere((element) =>
+            if (widget.isEdit || widget.editVehicleManufacturer != null) {
+              int ind = customerList.indexWhere((element) =>
                   element.id == widget.editVehicleManufacturer!.customerId);
+              selectedCustomer = customerList[ind];
             }
           }
         },
@@ -95,11 +100,16 @@ class _AddVehicleManufacturerScreenState
                             state is EditVehicleManufacturerState) {
                           if (state.submissionStatus ==
                               SubmissionStatus.success) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(
-                                    "Vehicle Manufacturer ${widget.isEdit ? 'edited' : 'added'} successfully")));
-                            context.read<AppCubit>().appPageChaged(
-                                const ViewVehicleManufacturerScreen());
+                            if (widget.returnData) {
+                              state as AddVehicleManufacturerState;
+                              Navigator.pop(context, state.vehicleManufacturer);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                  content: Text(
+                                      "Vehicle Manufacturer ${widget.isEdit ? 'edited' : 'added'} successfully")));
+                              context.read<AppCubit>().appPageChaged(
+                                  const ViewVehicleManufacturerScreen());
+                            }
                           } else if (state.submissionStatus ==
                               SubmissionStatus.failure) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(

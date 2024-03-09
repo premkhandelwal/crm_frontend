@@ -9,15 +9,12 @@ class Bms extends Equatable {
   final String id;
   final String name;
   final String details;
-  final List<String> harnessDetails;
-  final String makeId;
 
-  const Bms(
-      {this.id = "",
-      required this.name,
-      required this.details,
-      required this.harnessDetails,
-      required this.makeId});
+  const Bms({
+    this.id = "",
+    required this.name,
+    required this.details,
+  });
 
   factory Bms.fromJson(Map<String, dynamic> json) => _$BmsFromJson(json);
 
@@ -29,23 +26,17 @@ class Bms extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, details, harnessDetails, makeId];
+  List<Object?> get props => [id, name, details];
 
   Bms copyWith({
     String? id,
     String? name,
     String? details,
-    List<String>? harnessDetails,
-    String? makeId,
   }) {
     return Bms(
-      id:id ?? this.id,
-      name:name ?? this.name,
-      details:details ?? this.details,
-      harnessDetails: harnessDetails ?? this.harnessDetails,
-      makeId:makeId ?? this.makeId,
+      id: id ?? this.id,
+      name: name ?? this.name,
+      details: details ?? this.details,
     );
   }
-
-  
 }

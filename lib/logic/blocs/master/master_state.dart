@@ -10,8 +10,9 @@ final class MasterInitial extends MasterState {}
 final class AddCustomerState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
+  final Customer? customer;
 
-  AddCustomerState({required this.submissionStatus});
+  AddCustomerState({required this.submissionStatus, this.customer});
 }
 
 final class EditCustomerState extends MasterState {
@@ -128,8 +129,8 @@ final class FetchBmsState extends MasterState {
 final class AddBatchState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
-
-  AddBatchState({required this.submissionStatus});
+  final Batch? batch;
+  AddBatchState({required this.submissionStatus, this.batch});
 }
 
 final class EditBatchState extends MasterState {
@@ -206,8 +207,8 @@ final class FetchVehicleForCustomerState extends MasterState {
 final class AddVehicleManufacturerState extends MasterState {
   @override
   final SubmissionStatus submissionStatus;
-
-  AddVehicleManufacturerState({required this.submissionStatus});
+  final VehicleManufacturer? vehicleManufacturer;
+  AddVehicleManufacturerState({required this.submissionStatus, this.vehicleManufacturer});
 }
 
 final class EditVehicleManufacturerState extends MasterState {
@@ -222,5 +223,6 @@ final class DeleteVehicleManufacturerState extends MasterState {
   final SubmissionStatus submissionStatus;
   final VehicleManufacturer? deletedVehicleManufacturer;
 
-  DeleteVehicleManufacturerState({required this.submissionStatus, this.deletedVehicleManufacturer});
+  DeleteVehicleManufacturerState(
+      {required this.submissionStatus, this.deletedVehicleManufacturer});
 }

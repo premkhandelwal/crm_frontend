@@ -22,8 +22,9 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
       void addCustomer(Customer customerData) async {
         try {
           emit(AddCustomerState(submissionStatus: SubmissionStatus.inProgress));
-          await apiProvider.addCustomer(customerData);
-          emit(AddCustomerState(submissionStatus: SubmissionStatus.success));
+          Customer customer = await apiProvider.addCustomer(customerData);
+          emit(AddCustomerState(
+              submissionStatus: SubmissionStatus.success, customer: customer));
         } catch (e) {
           emit(AddCustomerState(submissionStatus: SubmissionStatus.failure));
         }
@@ -200,8 +201,9 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
       void addBatch(Batch batchData) async {
         try {
           emit(AddBatchState(submissionStatus: SubmissionStatus.inProgress));
-          await apiProvider.addBatch(batchData);
-          emit(AddBatchState(submissionStatus: SubmissionStatus.success));
+          Batch batch = await apiProvider.addBatch(batchData);
+          emit(AddBatchState(
+              submissionStatus: SubmissionStatus.success, batch: batch));
         } catch (e) {
           emit(AddBatchState(submissionStatus: SubmissionStatus.failure));
         }
@@ -316,39 +318,50 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
         }
       }
 
-      void addVehicleManufacturer(VehicleManufacturer vehicleManufacturerData) async {
+      void addVehicleManufacturer(
+          VehicleManufacturer vehicleManufacturerData) async {
         try {
-          emit(AddVehicleManufacturerState(submissionStatus: SubmissionStatus.inProgress));
-          await apiProvider.addVehicleManufacturer(vehicleManufacturerData);
-          emit(AddVehicleManufacturerState(submissionStatus: SubmissionStatus.success));
+          emit(AddVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.inProgress));
+          VehicleManufacturer vehicleManufacturer =
+              await apiProvider.addVehicleManufacturer(vehicleManufacturerData);
+          emit(AddVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.success,
+              vehicleManufacturer: vehicleManufacturer));
         } catch (e) {
-          emit(AddVehicleManufacturerState(submissionStatus: SubmissionStatus.failure));
+          emit(AddVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.failure));
         }
       }
 
-      void editVehicleManufacturer(VehicleManufacturer vehicleManufacturerData) async {
+      void editVehicleManufacturer(
+          VehicleManufacturer vehicleManufacturerData) async {
         try {
-          emit(EditVehicleManufacturerState(submissionStatus: SubmissionStatus.inProgress));
+          emit(EditVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.inProgress));
           await apiProvider.editVehicleManufacturer(vehicleManufacturerData);
-          emit(EditVehicleManufacturerState(submissionStatus: SubmissionStatus.success));
+          emit(EditVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.success));
         } catch (e) {
-          emit(EditVehicleManufacturerState(submissionStatus: SubmissionStatus.failure));
+          emit(EditVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.failure));
         }
       }
 
-      void deleteVehicleManufacturer(VehicleManufacturer vehicleManufacturerData) async {
+      void deleteVehicleManufacturer(
+          VehicleManufacturer vehicleManufacturerData) async {
         try {
-          emit(DeleteVehicleManufacturerState(submissionStatus: SubmissionStatus.inProgress));
+          emit(DeleteVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.inProgress));
           await apiProvider.deleteVehicleManufacturer(vehicleManufacturerData);
           emit(DeleteVehicleManufacturerState(
               submissionStatus: SubmissionStatus.success,
               deletedVehicleManufacturer: vehicleManufacturerData));
         } catch (e) {
-          emit(DeleteVehicleManufacturerState(submissionStatus: SubmissionStatus.failure));
+          emit(DeleteVehicleManufacturerState(
+              submissionStatus: SubmissionStatus.failure));
         }
       }
-
-
 
       switch (event.runtimeType) {
         case AddCustomerEvent:
@@ -419,7 +432,7 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
           return fetchAllVehicleManufacturer();
         case FetchVehicleForCustomerEvent:
           event as FetchVehicleForCustomerEvent;
-          return fetchVehicleForCustomer(event.customerId);  
+          return fetchVehicleForCustomer(event.customerId);
         case AddVehicleManufacturerEvent:
           event as AddVehicleManufacturerEvent;
           return addVehicleManufacturer(event.vehicleManufacturerData);
@@ -428,7 +441,7 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
           return editVehicleManufacturer(event.vehicleManufacturerData);
         case DeleteVehicleManufacturerEvent:
           event as DeleteVehicleManufacturerEvent;
-          return deleteVehicleManufacturer(event.vehicleManufacturerData);  
+          return deleteVehicleManufacturer(event.vehicleManufacturerData);
         default:
       }
     });

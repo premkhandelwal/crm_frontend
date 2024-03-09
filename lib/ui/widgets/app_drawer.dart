@@ -59,6 +59,15 @@ class _AppDrawerState extends State<AppDrawer> {
     List<Harness> harnessList = [];
     List<Make> makeList = [];
     List<VehicleManufacturer> vehicleManufacturerList = [];
+    MasterBloc masterBloc = BlocProvider.of<MasterBloc>(context);
+    bool complaintFetchSuccess = false;
+    bool customerFetchSuccess = false;
+    bool vehicleFetchSuccess = false;
+    bool batchFetchSuccess = false;
+    bool bmsFetchSuccess = false;
+    bool makeFetchSuccess = false;
+    bool harnessFetchSuccess = false;
+    bool exportToExcel = false;
 
     return [
       ListTile(
@@ -126,34 +135,33 @@ class _AppDrawerState extends State<AppDrawer> {
         listener: (context, masterState) {
           if (masterState.submissionStatus == SubmissionStatus.success) {
             if (masterState is FetchCustomerState) {
+              customerFetchSuccess = true;
               customerList = List.from(masterState.customerList);
-            } else if (masterState is FetchHarnessState) {
-              harnessList = List.from(masterState.harnessList);
             } else if (masterState is FetchBatchState) {
+              batchFetchSuccess = true;
               batchList = List.from(masterState.batchList);
             } else if (masterState is FetchBmsState) {
+              bmsFetchSuccess = true;
               bmsList = List.from(masterState.bmsList);
             } else if (masterState is FetchMakeState) {
+              makeFetchSuccess = true;
               makeList = List.from(masterState.makeList);
             } else if (masterState is FetchHarnessState) {
+              harnessFetchSuccess = true;
               harnessList = List.from(masterState.harnessList);
             } else if (masterState is FetchAllVehicleManufacturerState) {
+              vehicleFetchSuccess = true;
               vehicleManufacturerList =
                   List.from(masterState.vehicleManufacturerList);
             }
-          }
-        },
-        child: BlocListener<InfoBloc, InfoState>(
-          listener: (context, infoState) {
-            if (infoState is ComplaintFetchState &&
-                infoState.submissionStatus == SubmissionStatus.success) {
-              complaintsList = List.from(infoState.complaintList);
-            }
-          },
-          child: ListTile(
-            leading: Icon(Icons.circle, color: Theme.of(context).primaryColor),
-            title: const Text("Export to Excel"),
-            onTap: () {
+            if (exportToExcel &&
+                complaintFetchSuccess &&
+                customerFetchSuccess &&
+                vehicleFetchSuccess &&
+                batchFetchSuccess &&
+                bmsFetchSuccess &&
+                makeFetchSuccess &&
+                harnessFetchSuccess) {
               context.read<InfoBloc>().add(ExportToExcelEvent(
                   complaintList: complaintsList,
                   batchList: batchList,
@@ -162,6 +170,41 @@ class _AppDrawerState extends State<AppDrawer> {
                   harnessList: harnessList,
                   makeList: makeList,
                   vehicleManufacturerList: vehicleManufacturerList));
+              exportToExcel = false;
+              complaintFetchSuccess = false;
+              customerFetchSuccess = false;
+              vehicleFetchSuccess = false;
+              batchFetchSuccess = false;
+              bmsFetchSuccess = false;
+              makeFetchSuccess = false;
+              harnessFetchSuccess = false;
+            }
+          }
+        },
+        child: BlocListener<InfoBloc, InfoState>(
+          listener: (context, infoState) {
+            if (infoState is ComplaintFetchState &&
+                infoState.submissionStatus == SubmissionStatus.success) {
+              complaintFetchSuccess = true;
+              complaintsList = List.from(infoState.complaintList);
+            } else if (infoState is ComplaintFetchState &&
+                infoState.submissionStatus == SubmissionStatus.inProgress && exportToExcel) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Preparing export..")));
+            }
+          },
+          child: ListTile(
+            leading: Icon(Icons.circle, color: Theme.of(context).primaryColor),
+            title: const Text("Export to Excel"),
+            onTap: () {
+              exportToExcel = true;
+              context.read<InfoBloc>().add(FetchAllComplaintsEvent());
+              masterBloc.add(FetchCustomerEvent());
+              masterBloc.add(FetchAllVehicleManufacturerEvent());
+              masterBloc.add(FetchBatchEvent());
+              masterBloc.add(FetchBmsEvent());
+              masterBloc.add(FetchMakeEvent());
+              masterBloc.add(FetchHarnessEvent());
             },
           ),
         ),

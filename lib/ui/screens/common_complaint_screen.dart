@@ -8,6 +8,9 @@ import 'package:crm/models/bms_request.dart';
 import 'package:crm/models/complaint_request.dart';
 import 'package:crm/models/customer_request.dart';
 import 'package:crm/models/vehicle_manufacturer_request.dart';
+import 'package:crm/ui/screens/add_screens/add_batch_screen.dart';
+import 'package:crm/ui/screens/add_screens/add_customer_screen.dart';
+import 'package:crm/ui/screens/add_screens/add_vehicle_manufacturer_screen.dart';
 import 'package:crm/ui/screens/common_complaint_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,6 +58,69 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
     List<Complaint> filteredComplaintList = [];
     int layerInd = 0; //Home Page
     Complaint? filteredComplaint;
+
+    void addCustomer() async {
+      final result = await Navigator.of(context).push(MaterialPageRoute(
+        builder: (ctx) => const AddCustomerScreen(returnData: true),
+      ));
+      customers.add(result);
+    }
+
+    void addVehicleManufacturer() async {
+      await Navigator.of(context).push(MaterialPageRoute(
+        builder: (ctx) => AddVehicleManufacturerScreen(
+            returnData: true,
+            editVehicleManufacturer: VehicleManufacturer(
+                name: "", customerId: selectedCustomer!.id)),
+      ));
+      if (selectedCustomer != null) {
+        masterBloc.add(
+            FetchVehicleForCustomerEvent(customerId: selectedCustomer!.id));
+      }
+    }
+
+    void addBatch() async {
+      await Navigator.of(context).push(MaterialPageRoute(
+        builder: (ctx) => AddBatchScreen(
+            returnData: true,
+            editBatch: Batch(
+                batchName: "",
+                customerId: selectedCustomer!.id,
+                vehicleManufacturerId: selectedVehicleManufacturer!.id)),
+      ));
+      if (selectedVehicleManufacturer != null) {
+        masterBloc.add(FetchBatchForVehicleManufacturerEvent(
+            vehicleManufacturerId: selectedVehicleManufacturer!));
+      }
+    }
+
+    void addBmsSerialNo(BuildContext context, Batch? selectedBatchForCustomer) {
+      TextEditingController ctller = TextEditingController();
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Add Serial No"),
+          content: TextFormField(
+            controller: ctller,
+            decoration: const InputDecoration(hintText: "Enter BMS Serial No"),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                List<String> bmsSrNoList =
+                    selectedBatchForCustomer?.bmsSrNoList ?? [];
+                bmsSrNoList.add(ctller.text);
+                masterBloc.add(AddBmsSrNoInBatchEvent(
+                    batch: selectedBatchForCustomer!
+                        .copyWith(bmsSrNoList: bmsSrNoList)));
+              },
+              child: const Text("Add"),
+            )
+          ],
+        ),
+      );
+    }
 
     return BlocConsumer<ComplaintCubit, ComplaintState>(
       listener: (context, complaintState) {
@@ -217,7 +283,7 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                                   filteredComplaintList.add(state.complaint!);
                                   filteredComplaint = state.complaint;
                                 }
-                              }  else if (state is ComplaintFetchState &&
+                              } else if (state is ComplaintFetchState &&
                                   state.submissionStatus ==
                                       SubmissionStatus.success) {
                                 complaintsList = List.from(state.complaintList);
@@ -251,19 +317,36 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
                             },
                             builder: (context, state) {
                               return selectedCustomer == null
-                                  ? buildCustomerWidget(customers)
+                                  ? customers.isNotEmpty
+                                      ? buildCustomerWidget(customers)
+                                      : const Center(
+                                          child: Text("No customers found!!"))
                                   : layerInd == 1
-                                      ? buildVehicleManufacturerListView(
-                                          vehicleManufacturerListForCustomer,
-                                          filteredComplaintList)
-                                      : layerInd == 2
-                                          ? buildBatchListView(
-                                              batchListForCustomer,
+                                      ? vehicleManufacturerListForCustomer
+                                              .isNotEmpty
+                                          ? buildVehicleManufacturerListView(
+                                              vehicleManufacturerListForCustomer,
                                               filteredComplaintList)
-                                          : layerInd == 3
-                                              ? buildBmsSerialNoListView(
-                                                  serialNoListforSelectedBms,
+                                          : const Center(
+                                              child: Text(
+                                                  "No vehicle manufacturers found!!"))
+                                      : layerInd == 2
+                                          ? batchListForCustomer.isNotEmpty
+                                              ? buildBatchListView(
+                                                  batchListForCustomer,
                                                   filteredComplaintList)
+                                              : const Center(
+                                                  child:
+                                                      Text("No batch found!!"))
+                                          : layerInd == 3
+                                              ? serialNoListforSelectedBms
+                                                      .isNotEmpty
+                                                  ? buildBmsSerialNoListView(
+                                                      serialNoListforSelectedBms,
+                                                      filteredComplaintList)
+                                                  : const Center(
+                                                      child: Text(
+                                                          "No BMS Serial Number added!!"))
                                               : (layerInd == 4)
                                                   ? ComplaintForm(
                                                       selectedCustomer:
@@ -286,35 +369,19 @@ class _CommonComplaintScreenState extends State<CommonComplaintScreen> {
               );
             },
           ),
-          floatingActionButton: layerInd == 3
+          floatingActionButton: layerInd != 4
               ? FloatingActionButton(
-                  onPressed: () {
-                    TextEditingController ctller = TextEditingController();
-                    showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text("Add Serial No"),
-                        content: TextFormField(
-                          controller: ctller,
-                          decoration: const InputDecoration(
-                              hintText: "Enter BMS Serial No"),
-                        ),
-                        actions: [
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(ctx);
-                              List<String> bmsSrNoList =
-                                  selectedBatchForCustomer?.bmsSrNoList ?? [];
-                              bmsSrNoList.add(ctller.text);
-                              masterBloc.add(AddBmsSrNoInBatchEvent(
-                                  batch: selectedBatchForCustomer!
-                                      .copyWith(bmsSrNoList: bmsSrNoList)));
-                            },
-                            child: const Text("Add"),
-                          )
-                        ],
-                      ),
-                    );
+                  onPressed: () async {
+                    layerInd == 0
+                        ? addCustomer()
+                        : layerInd == 1
+                            ? addVehicleManufacturer()
+                            : layerInd == 2
+                                ? addBatch()
+                                : layerInd == 3
+                                    ? addBmsSerialNo(
+                                        context, selectedBatchForCustomer)
+                                    : Container();
                   },
                   child: const Icon(Icons.add),
                 )
